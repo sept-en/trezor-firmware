@@ -25,7 +25,6 @@ import json
 import os
 import re
 import sys
-from binascii import hexlify
 from decimal import Decimal
 
 import click
@@ -1871,7 +1870,7 @@ def binance_get_public_key(connect, address, show_display):
     client = connect()
     address_n = tools.parse_path(address)
 
-    return hexlify(binance.get_public_key(client, address_n, show_display))
+    return binance.get_public_key(client, address_n, show_display).hex()
 
 
 @cli.command(help="Sign Binance transaction")
