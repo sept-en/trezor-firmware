@@ -5,7 +5,7 @@ from trezor.pin import pin_to_int, show_pin_timeout
 from trezor.messages.BeamOwnerKey import BeamOwnerKey
 from trezor.messages.Failure import Failure
 
-from apps.common.request_pin import request_pin
+from apps.common.request_pin import PinCancelled, request_pin
 from apps.common import layout
 from apps.beam.helpers import (
     bin_to_str,
@@ -18,15 +18,17 @@ import ubinascii
 
 async def get_owner_key(ctx, msg):
     if not config.has_pin():
-        config.unlock(pin_to_int(""))
         return Failure(message='PIN is not set')
-    label = None
+    label = "Enter your PIN"
     while True:
-        pin = await request_pin(label)
-        if config.unlock(pin_to_int(pin)):
-            break
-        else:
-            label = "Wrong PIN, enter again"
+        try:
+            pin = await ctx.wait(request_pin(label))
+            if config.unlock(pin_to_int(pin)):
+                break
+            else:
+                label = "Wrong PIN, enter again"
+        except PinCancelled:
+            raise wire.ActionCancelled("Cancelled")
 
     export_warning_msg = 'Exposing the key to a third party allows them to see your balance.'
     await beam_confirm_message(ctx, 'Owner key', export_warning_msg, False)

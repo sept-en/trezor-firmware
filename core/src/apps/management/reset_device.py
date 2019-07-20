@@ -12,6 +12,7 @@ from apps.common import mnemonic, storage
 from apps.common.confirm import require_confirm
 from apps.management.change_pin import request_pin_confirm
 from apps.management.common import layout
+from apps.beam.nonce import create_master_nonce
 
 if __debug__:
     from apps import debug
@@ -48,6 +49,9 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     if msg.slip39:
         storage.slip39.set_identifier(slip39.generate_random_identifier())
         storage.slip39.set_iteration_exponent(slip39.DEFAULT_ITERATION_EXPONENT)
+
+    beam_nonce_seed = random.bytes(32)
+    create_master_nonce(beam_nonce_seed)
 
     # should we back up the wallet now?
     if not msg.no_backup and not msg.skip_backup:
