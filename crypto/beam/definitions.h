@@ -15,6 +15,12 @@
 #define MASTER_NONCE_SLOT 0
 #define MAX_NONCE_SLOT 255
 
+#define KIDV_SCHEME_V0  0
+#define KIDV_SCHEME_V1  1
+#define KIDV_SCHEME_BB21  2
+#define KIDV_SCHEME_SUB_KEY_BITS  24U
+#define KIDV_SCHEME_SUB_KEY_MASK ((((uint32_t)1U) << KIDV_SCHEME_SUB_KEY_BITS) - 1)
+
 #define _COUNT_OF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #define _FOURCC_CONST(a, b, c, d)                                            \
   ((uint32_t)((((((uint8_t)a << 8) | (uint8_t)b) << 8) | (uint8_t)c) << 8) | \

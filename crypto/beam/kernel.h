@@ -82,6 +82,7 @@ void ecc_tag_add_value(const secp256k1_gej* h_gen, uint64_t value,
 void create_kidv_image(const HKdf_t* kdf, const key_idv_t* key_idv,
                        secp256k1_gej* out_commitment, uint8_t create_coin_key);
 void switch_commitment(const uint8_t* asset_id, secp256k1_gej* h_gen);
+void switch_commitment_get_hash(const key_idv_t* kidv, uint8_t* hash_id);
 void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
                               const HKdf_t* kdf, const key_idv_t* kidv,
                               uint8_t has_commitment,

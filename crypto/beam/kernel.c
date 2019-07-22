@@ -76,12 +76,38 @@ void create_kidv_image(const HKdf_t* kdf, const key_idv_t* kidv,
   }
 }
 
+void switch_commitment_get_hash(const key_idv_t* kidv, uint8_t* hash_id) {
+  const uint32_t scheme = kidv_get_scheme(kidv);
+  if (scheme > KIDV_SCHEME_V0) {
+    if (scheme == KIDV_SCHEME_BB21) {
+      // BB2.1 workaround
+      key_idv_t kidv2;
+      memcpy(&kidv2, kidv, sizeof(key_id_t));
+      kidv_set_subkey(&kidv2, kidv_get_subkey(kidv), KIDV_SCHEME_V0);
+      generate_hash_id(kidv2.id.idx, kidv2.id.type, kidv2.id.sub_idx, hash_id);
+    } else {
+      // newer scheme - account for the Value.
+      // Make it infeasible to tamper with value for unknown blinding factor
+      SHA256_CTX x;
+      sha256_Init(&x);
+      sha256_Update(&x, (const uint8_t*)"kidv-1", 7);
+      sha256_write_64(&x, kidv->id.idx);
+      sha256_write_64(&x, kidv->id.type);
+      sha256_write_64(&x, kidv->id.sub_idx);
+      sha256_write_64(&x, kidv->value);
+      sha256_Final(&x, hash_id);
+    }
+  } else {
+    generate_hash_id(kidv->id.idx, kidv->id.type, kidv->id.sub_idx, hash_id);
+  }
+}
+
 void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
                               const HKdf_t* kdf, const key_idv_t* kidv,
                               uint8_t has_commitment,
                               const secp256k1_gej* h_gen) {
   uint8_t hash_id[DIGEST_LENGTH];
-  generate_hash_id(kidv->id.idx, kidv->id.type, kidv->id.sub_idx, hash_id);
+  switch_commitment_get_hash(kidv, hash_id);
 
   derive_key(kdf->generator_secret, DIGEST_LENGTH, hash_id, DIGEST_LENGTH,
              &kdf->cofactor, sk);

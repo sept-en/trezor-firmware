@@ -19,6 +19,12 @@ void seed_to_kdf(const uint8_t *seed, size_t n, uint8_t *out_gen32,
 void generate_hash_id(uint64_t idx, uint32_t type, uint32_t sub_idx,
                       uint8_t *out32);
 
+uint32_t kidv_get_scheme(const key_idv_t* kidv);
+
+uint32_t kidv_get_subkey(const key_idv_t* kidv);
+
+void kidv_set_subkey(key_idv_t* kidv, uint32_t sub_idx, uint32_t scheme);
+
 void derive_key(const uint8_t *parent, uint8_t parent_size,
                 const uint8_t *hash_id, uint8_t id_size, const scalar_t *cof_sk,
                 scalar_t *out_sk);
