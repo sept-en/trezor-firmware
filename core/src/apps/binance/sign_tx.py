@@ -43,9 +43,7 @@ async def sign_tx(ctx, envelope, keychain):
 
     signature_bytes = generate_content_signature(msg_json.encode(), node.private_key())
 
-    return BinanceSignedTx(
-        signature=signature_bytes, public_key=node.public_key(), json=msg_json
-    )
+    return BinanceSignedTx(signature=signature_bytes, public_key=node.public_key())
 
 
 def generate_content_signature(json: bytes, private_key: bytes) -> bytes:
