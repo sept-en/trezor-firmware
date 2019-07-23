@@ -15,7 +15,7 @@ from apps.common import mnemonic, storage
 from apps.common.confirm import require_confirm
 from apps.homescreen.homescreen import display_homescreen
 from apps.management.change_pin import request_pin_ack, request_pin_confirm
-from apps.beam.nonce import create_master_nonce
+from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 
 if __debug__:
     from apps.debug import confirm_signal, input_signal
@@ -117,7 +117,7 @@ async def recovery_device(ctx: wire.Context, msg: RecoveryDevice) -> Success:
     display_homescreen()
 
     beam_nonce_seed = random.bytes(32)
-    create_master_nonce(beam_nonce_seed)
+    create_beam_master_nonce(beam_nonce_seed)
 
     return Success(message="Device recovered")
 
