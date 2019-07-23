@@ -2,11 +2,16 @@
 # fmt: off
 import protobuf as p
 
+from . import FailureType
+
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal
+        EnumTypeFailureType = Literal[None, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 99]
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
+        EnumTypeFailureType = None
 
 
 class Failure(p.MessageType):
@@ -14,7 +19,7 @@ class Failure(p.MessageType):
 
     def __init__(
         self,
-        code: int = None,
+        code: EnumTypeFailureType = None,
         message: str = None,
     ) -> None:
         self.code = code
@@ -23,6 +28,6 @@ class Failure(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('code', p.UVarintType, 0),
+            1: ('code', p.EnumType(FailureType), 0),
             2: ('message', p.UnicodeType, 0),
         }

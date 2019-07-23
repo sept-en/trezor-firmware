@@ -2,18 +2,23 @@
 # fmt: off
 import protobuf as p
 
+from . import TezosContractType
+
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal
+        EnumTypeTezosContractType = Literal[None, 0, 1]
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
+        EnumTypeTezosContractType = None
 
 
 class TezosContractID(p.MessageType):
 
     def __init__(
         self,
-        tag: int = None,
+        tag: EnumTypeTezosContractType = None,
         hash: bytes = None,
     ) -> None:
         self.tag = tag
@@ -22,6 +27,6 @@ class TezosContractID(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('tag', p.UVarintType, 0),
+            1: ('tag', p.EnumType(TezosContractType), 0),
             2: ('hash', p.BytesType, 0),
         }

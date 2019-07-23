@@ -2,18 +2,23 @@
 # fmt: off
 from .. import protobuf as p
 
+from . import NEMModificationType
+
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal
+        EnumTypeNEMModificationType = Literal[None, 1, 2]
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
+        EnumTypeNEMModificationType = None
 
 
 class NEMCosignatoryModification(p.MessageType):
 
     def __init__(
         self,
-        type: int = None,
+        type: EnumTypeNEMModificationType = None,
         public_key: bytes = None,
     ) -> None:
         self.type = type
@@ -22,6 +27,6 @@ class NEMCosignatoryModification(p.MessageType):
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('type', p.UVarintType, 0),
+            1: ('type', p.EnumType(NEMModificationType), 0),
             2: ('public_key', p.BytesType, 0),
         }

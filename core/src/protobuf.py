@@ -121,6 +121,22 @@ class BoolType:
     WIRE_TYPE = 0
 
 
+class EnumType:
+    WIRE_TYPE = 0
+
+    def __init__(self, values_module):
+        self.values_module = values_module
+
+    def validate(self, fvalue: int) -> int:
+        for name in dir(self.values_module):
+            if name.startswith("__"):
+                continue
+            if getattr(self.values_module, name) == fvalue:
+                return fvalue
+        else:
+            raise TypeError("Invalid enum value")
+
+
 class BytesType:
     WIRE_TYPE = 2
 
@@ -210,6 +226,8 @@ async def load_message(
             fvalue = uint_to_sint(ivalue)
         elif ftype is BoolType:
             fvalue = bool(ivalue)
+        elif isinstance(ftype, EnumType):
+            fvalue = ftype.validate(ivalue)
         elif ftype is BytesType:
             fvalue = bytearray(ivalue)
             await reader.areadinto(fvalue)
@@ -258,7 +276,7 @@ async def dump_message(
             repvalue[0] = fvalue
             fvalue = repvalue
 
-        if issubclass(ftype, MessageType):
+        if isinstance(ftype, type) and issubclass(ftype, MessageType):
             ffields = ftype.get_fields()
         else:
             ffields = None
@@ -274,6 +292,9 @@ async def dump_message(
 
             elif ftype is BoolType:
                 await dump_uvarint(writer, int(svalue))
+
+            elif isinstance(ftype, EnumType):
+                await dump_uvarint(writer, ftype.validate(svalue))
 
             elif ftype is BytesType:
                 if isinstance(svalue, list):
@@ -329,6 +350,10 @@ def count_message(msg: MessageType, fields: Dict = None) -> int:
                 nbytes += count_uvarint(sint_to_uint(svalue))
 
         elif ftype is BoolType:
+            for svalue in fvalue:
+                nbytes += count_uvarint(int(svalue))
+
+        elif isinstance(ftype, EnumType):
             for svalue in fvalue:
                 nbytes += count_uvarint(int(svalue))
 

@@ -2,13 +2,17 @@
 # fmt: off
 import protobuf as p
 
+from . import InputScriptType
 from .MultisigRedeemScriptType import MultisigRedeemScriptType
 
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal
+        EnumTypeInputScriptType = Literal[None, 0, 1, 2, 3, 4]
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
+        EnumTypeInputScriptType = None
 
 
 class TxInputType(p.MessageType):
@@ -20,7 +24,7 @@ class TxInputType(p.MessageType):
         prev_index: int = None,
         script_sig: bytes = None,
         sequence: int = None,
-        script_type: int = None,
+        script_type: EnumTypeInputScriptType = None,
         multisig: MultisigRedeemScriptType = None,
         amount: int = None,
         decred_tree: int = None,
@@ -49,7 +53,7 @@ class TxInputType(p.MessageType):
             3: ('prev_index', p.UVarintType, 0),  # required
             4: ('script_sig', p.BytesType, 0),
             5: ('sequence', p.UVarintType, 0),  # default=4294967295
-            6: ('script_type', p.UVarintType, 0),  # default=SPENDADDRESS
+            6: ('script_type', p.EnumType(InputScriptType), 0),  # default=SPENDADDRESS
             7: ('multisig', MultisigRedeemScriptType, 0),
             8: ('amount', p.UVarintType, 0),
             9: ('decred_tree', p.UVarintType, 0),
