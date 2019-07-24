@@ -118,7 +118,7 @@ class TestBeamSignTxMessage(TrezorTest):
         kernel_params = beam.create_kernel_params(KERNEL_PARAMS)
 
         expected_responses = [
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
             messages.BeamSignedTransaction()
         ]
 

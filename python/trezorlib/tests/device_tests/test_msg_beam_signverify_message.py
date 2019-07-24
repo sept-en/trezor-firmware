@@ -105,11 +105,11 @@ class TestBeamSignVerifyMessage(TrezorTest):
             # Public Key
             messages.BeamECCPoint(),
             # Verify process
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
             messages.Success()
         ]
         expected_responses_negative = [
@@ -202,11 +202,11 @@ class TestBeamSignVerifyMessage(TrezorTest):
 
         expected_responses_positive = [
             # Verify process
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
             messages.Success()
         ]
         expected_responses_negative = [
@@ -271,18 +271,18 @@ class TestBeamSignVerifyMessage(TrezorTest):
 
         expected_responses = [
             # Sign message
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
             # Signature
             messages.BeamSignature(),
             # Public Key
             messages.BeamECCPoint(),
             # Verify process
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
             messages.Success()
         ]
 

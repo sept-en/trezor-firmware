@@ -31,9 +31,9 @@ class TestBeamGetOwnerKeyMessage(TrezorTest):
         pin = "1234"
 
         expected_responses = [
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
-            messages.ButtonRequest(code=messages.ButtonRequestType.Other),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
+            messages.ButtonRequest(),
             messages.BeamOwnerKey()
         ]
 
