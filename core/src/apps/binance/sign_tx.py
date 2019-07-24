@@ -23,7 +23,7 @@ async def sign_tx(ctx, envelope, keychain):
 
     tx_req = BinanceTxRequest()
 
-    msg = await ctx.call(
+    msg = await ctx.call_any(
         tx_req,
         MessageType.BinanceCancelMsg,
         MessageType.BinanceOrderMsg,
