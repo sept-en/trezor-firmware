@@ -16,27 +16,25 @@
 
 import pytest
 
-from trezorlib import beam
-from trezorlib import messages
+from trezorlib import beam, messages
 
-from .conftest import setup_client
 from .common import TrezorTest
 
 import binascii
 
-@pytest.mark.beam
 @pytest.mark.skip_t1 # T1 support is not planned
+@pytest.mark.beam
 class TestBeamGenerateKey(TrezorTest):
     @pytest.mark.parametrize(
         "idx, type, sub_idx, value, expected_key_image_x, expected_key_image_y",
         [
             (
                 0, 0, 0, 0,
-                "cd42fb9a8635d3db969026c0980758cca79e019d706bc7eab447594db0d55a14", 0,
+                "cd42fb9a8635d3db969026c0980758cca79e019d706bc7eab447594db0d55a14", 1,
             ),
             (
                 0, 0, 0, 1,
-                "af37e62530b9ebb0244ebb85723d0a05217c1db9171d0efa0f363d9740b026a0", 0,
+                "af37e62530b9ebb0244ebb85723d0a05217c1db9171d0efa0f363d9740b026a0", 1,
             ),
             (
                 0, 0, 1, 0,
@@ -48,15 +46,15 @@ class TestBeamGenerateKey(TrezorTest):
             ),
             (
                 0, 1, 0, 0,
-                "a07320264c168029fb2cbb6b04a0f7580c35edfccb6698bc21d45f5cb7bf40d4", 0,
+                "a07320264c168029fb2cbb6b04a0f7580c35edfccb6698bc21d45f5cb7bf40d4", 1,
             ),
             (
                 0, 2, 0, 0,
-                "e47ea24fc36b6fd0dfa5466460d4dd0c7704d1c4b7a6e897915b5981736702e1", 0,
+                "e47ea24fc36b6fd0dfa5466460d4dd0c7704d1c4b7a6e897915b5981736702e1", 1,
             ),
             (
                 0, 2, 3, 0,
-                "6fcfecbe68f170fbead504785cb7ef590c2a64d1168560aa4dadb32b51eecc64", 0,
+                "6fcfecbe68f170fbead504785cb7ef590c2a64d1168560aa4dadb32b51eecc64", 1,
             ),
             (
                 1, 0, 0, 0,
@@ -64,11 +62,11 @@ class TestBeamGenerateKey(TrezorTest):
             ),
             (
                 1, 2, 3, 4,
-                "c769ac4cdcd4bc15e9d6c431d9fb05c1b52ee7296566fdce7b6536906f2358b8", 0,
+                "c769ac4cdcd4bc15e9d6c431d9fb05c1b52ee7296566fdce7b6536906f2358b8", 1,
             ),
             (
                 4, 3, 2, 1,
-                "f572003c7c99b8e5443b91ac1cba2762c1614a3e53606629e6fb4ab22e26ea7a", 0,
+                "f572003c7c99b8e5443b91ac1cba2762c1614a3e53606629e6fb4ab22e26ea7a", 1,
             ),
         ],
     )
@@ -76,13 +74,14 @@ class TestBeamGenerateKey(TrezorTest):
         self.setup_mnemonic_allallall()
         is_coin_key = True
 
-        generated_key = beam.generate_key(self.client, idx, type, sub_idx, value, is_coin_key)
-        print(generated_key)
-        assert(binascii.hexlify(bytearray(generated_key.x)).decode('ascii') == expected_key_image_x)
-        #assert('{:02x}'.format(generated_key.x.decode('utf-8')) == expected_key_image_x)
-        #assert(int(generated_key.y) == 1)
+        expected_responses = [
+            messages.BeamECCPoint()
+        ]
 
+        with self.client:
+            self.client.set_expected_responses(expected_responses)
 
-if __name__ == '__main__':
-    unittest.main()
+            generated_key = beam.generate_key(self.client, idx, type, sub_idx, value, is_coin_key)
+            assert(generated_key.x.hex() == expected_key_image_x)
+            assert(int(generated_key.y) == expected_key_image_y)
 
