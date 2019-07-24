@@ -114,16 +114,17 @@ void generate_hash_id(uint64_t idx, uint32_t type, uint32_t sub_idx,
   sha256_Final(&x, out32);
 }
 
-uint32_t kidv_get_scheme(const key_idv_t* kidv) {
+uint32_t kidv_get_scheme(const key_idv_t *kidv) {
   return kidv->id.sub_idx >> KIDV_SCHEME_SUB_KEY_BITS;
 }
 
-uint32_t kidv_get_subkey(const key_idv_t* kidv) {
+uint32_t kidv_get_subkey(const key_idv_t *kidv) {
   return kidv->id.sub_idx & KIDV_SCHEME_SUB_KEY_MASK;
 }
 
-void kidv_set_subkey(key_idv_t* kidv, uint32_t sub_idx, uint32_t scheme) {
-  kidv->id.sub_idx = (sub_idx & KIDV_SCHEME_SUB_KEY_MASK) | (scheme << KIDV_SCHEME_SUB_KEY_BITS);
+void kidv_set_subkey(key_idv_t *kidv, uint32_t sub_idx, uint32_t scheme) {
+  kidv->id.sub_idx = (sub_idx & KIDV_SCHEME_SUB_KEY_MASK) |
+                     (scheme << KIDV_SCHEME_SUB_KEY_BITS);
 }
 
 void derive_key(const uint8_t *parent, uint8_t parent_size,

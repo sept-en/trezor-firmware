@@ -2,9 +2,9 @@
 #include "mpconfigport.h"
 #endif
 
-#include "internal.h"
 #include <string.h>
 #include "../aes/aes.h"
+#include "internal.h"
 #include "multi_mac.h"
 
 int memis0(const void *p, size_t n) {
@@ -168,21 +168,21 @@ void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
 
       /** This uses a conditional move to avoid any secret data in array
        * indexes.
-                                        *   _Any_ use of secret indexes has been
+       *   _Any_ use of secret indexes has been
        * demonstrated to result in timing
-                                        *   sidechannels, even when the
+       *   sidechannels, even when the
        * cache-line access patterns are uniform.
-                                        *  See also:
-                                        *   "A word of warning", CHES 2013 Rump
+       *  See also:
+       *   "A word of warning", CHES 2013 Rump
        * Session, by Daniel J. Bernstein and Peter Schwabe
-                                        *    (https://cryptojedi.org/peter/data/chesrump-20130822.pdf)
+       *    (https://cryptojedi.org/peter/data/chesrump-20130822.pdf)
        * and
-                                        *   "Cache Attacks and Countermeasures:
+       *   "Cache Attacks and Countermeasures:
        * the Case of AES", RSA 2006,
-                                        *    by Dag Arne Osvik, Adi Shamir, and
+       *    by Dag Arne Osvik, Adi Shamir, and
        * Eran Tromer
-                                        *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
-                                        */
+       *    (http://www.tau.ac.il/~tromer/papers/cache.pdf)
+       */
 
       const secp256k1_gej *pSel;
       pSel = pPts + nSel;

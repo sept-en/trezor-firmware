@@ -378,4 +378,4 @@ class TestBeamSignVerifyMessage(TrezorTest):
                 pk.y,
                 message,
             )
-            assert is_verified == True
+            assert is_verified

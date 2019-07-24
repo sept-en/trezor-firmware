@@ -12,14 +12,18 @@
 #define INNER_PRODUCT_I_CYCLE_0 \
   2  // condense source generators into points (after 3 iterations, 8 points)
 
-typedef struct { const scalar_t *multiplier[2]; } inner_product_modifier_t;
+typedef struct {
+  const scalar_t *multiplier[2];
+} inner_product_modifier_t;
 
 typedef struct {
   scalar_t pwr[2][INNER_PRODUCT_N_DIM];
   uint8_t use[2];
 } _calculator_modifier_expanded_t;
 
-typedef struct { scalar_t val[INNER_PRODUCT_N_CYCLES]; } _challenge_set_xset_t;
+typedef struct {
+  scalar_t val[INNER_PRODUCT_N_CYCLES];
+} _challenge_set_xset_t;
 
 typedef struct {
   scalar_t dot_multiplier;

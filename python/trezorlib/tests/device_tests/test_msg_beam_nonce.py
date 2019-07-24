@@ -34,7 +34,7 @@ class TestBeamGenerateNonce(TrezorTest):
 
         with client:
             client.set_expected_responses(expected_responses)
-            nonce_image = beam.generate_nonce(client, slot)
+            _ = beam.generate_nonce(client, slot)
 
 
 @pytest.mark.skip_t1  # T1 support is not planned

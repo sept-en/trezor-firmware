@@ -1,22 +1,19 @@
 #include "util.h"
 
-void secp256k1_callback_call(const secp256k1_callback *const cb, const char *const text)
-{
+void secp256k1_callback_call(const secp256k1_callback *const cb,
+                             const char *const text) {
   cb->fn(text, (void *)cb->data);
 }
 
-void *checked_malloc(const secp256k1_callback *cb, size_t size)
-{
+void *checked_malloc(const secp256k1_callback *cb, size_t size) {
   void *ret = malloc(size);
-  if (ret == NULL)
-  {
+  if (ret == NULL) {
     secp256k1_callback_call(cb, "Out of memory");
   }
   return ret;
 }
 
-int secp256k1_sign_and_abs64(uint64_t *out, int64_t in)
-{
+int secp256k1_sign_and_abs64(uint64_t *out, int64_t in) {
   uint64_t mask0, mask1;
   int ret;
   ret = in < 0;
@@ -27,11 +24,9 @@ int secp256k1_sign_and_abs64(uint64_t *out, int64_t in)
   return ret;
 }
 
-int secp256k1_clz64_var(uint64_t x)
-{
+int secp256k1_clz64_var(uint64_t x) {
   int ret;
-  if (!x)
-  {
+  if (!x) {
     return 64;
   }
 #if defined(HAVE_BUILTIN_CLZLL)

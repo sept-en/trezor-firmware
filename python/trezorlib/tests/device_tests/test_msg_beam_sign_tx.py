@@ -98,6 +98,6 @@ class TestBeamSignTxMessage(TrezorTest):
         with self.client:
             self.client.set_expected_responses(expected_responses)
             self.client.set_input_flow(input_flow)
-            signed_transaction = beam.sign_tx(
+            _ = beam.sign_tx(
                 self.client, inputs, outputs, offset_sk, nonce_slot, kernel_params
             )

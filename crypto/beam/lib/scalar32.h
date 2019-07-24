@@ -11,17 +11,20 @@
 
 /** A scalar modulo the group order of the secp256k1 curve. */
 typedef struct {
-    uint32_t d[8];
+  uint32_t d[8];
 } scalar_t;
 
 /** Clear a scalar to prevent the leak of sensitive data. */
 void scalar_clear(scalar_t *r);
 
-/** Access bits from a scalar. All requested bits must belong to the same 32-bit limb. */
-unsigned int scalar_get_bits(const scalar_t *a, unsigned int offset, unsigned int count);
+/** Access bits from a scalar. All requested bits must belong to the same 32-bit
+ * limb. */
+unsigned int scalar_get_bits(const scalar_t *a, unsigned int offset,
+                             unsigned int count);
 
 /** Access bits from a scalar. Not constant time. */
-unsigned int scalar_get_bits_var(const scalar_t *a, unsigned int offset, unsigned int count);
+unsigned int scalar_get_bits_var(const scalar_t *a, unsigned int offset,
+                                 unsigned int count);
 
 /** Set a scalar from a big endian byte array. */
 void scalar_set_b32(scalar_t *r, const unsigned char *bin, int *overflow);
@@ -35,10 +38,12 @@ void scalar_set_u64(scalar_t *r, uint64_t v);
 /** Convert a scalar to a byte array. */
 void scalar_get_b32(unsigned char *bin, const scalar_t *a);
 
-/** Add two scalars together (modulo the group order). Returns whether it overflowed. */
+/** Add two scalars together (modulo the group order). Returns whether it
+ * overflowed. */
 int scalar_add(scalar_t *r, const scalar_t *a, const scalar_t *b);
 
-/** Conditionally add a power of two to a scalar. The result is not allowed to overflow. */
+/** Conditionally add a power of two to a scalar. The result is not allowed to
+ * overflow. */
 void scalar_cadd_bit(scalar_t *r, unsigned int bit, int flag);
 
 /** Multiply two scalars (modulo the group order). */
@@ -54,7 +59,8 @@ void scalar_sqr(scalar_t *r, const scalar_t *a);
 /** Compute the inverse of a scalar (modulo the group order). */
 void scalar_inverse(scalar_t *r, const scalar_t *a);
 
-/** Compute the inverse of a scalar (modulo the group order), without constant-time guarantee. */
+/** Compute the inverse of a scalar (modulo the group order), without
+ * constant-time guarantee. */
 void scalar_inverse_var(scalar_t *r, const scalar_t *a);
 
 /** Compute the complement of a scalar (modulo the group order). */
@@ -79,7 +85,9 @@ int scalar_cond_negate(scalar_t *a, int flag);
 /** Compare two scalars. */
 int scalar_eq(const scalar_t *a, const scalar_t *b);
 
-/** Multiply a and b (without taking the modulus!), divide by 2**shift, and round to the nearest integer. Shift must be at least 256. */
-void scalar_mul_shift_var(scalar_t *r, const scalar_t *a, const scalar_t *b, unsigned int shift);
+/** Multiply a and b (without taking the modulus!), divide by 2**shift, and
+ * round to the nearest integer. Shift must be at least 256. */
+void scalar_mul_shift_var(scalar_t *r, const scalar_t *a, const scalar_t *b,
+                          unsigned int shift);
 
-#endif // _SCALAR_32_
+#endif  // _SCALAR_32_
