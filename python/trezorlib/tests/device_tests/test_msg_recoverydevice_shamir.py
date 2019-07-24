@@ -221,3 +221,140 @@ class TestMsgRecoveryDeviceShamir(TrezorTest):
         # check that the device is wiped
         features = self.client.call_raw(proto.Initialize())
         assert features.initialized is False
+
+    def test_warnings(self):
+        # 128 bits security, 3 of 6
+        mnemonics = [
+            "extra extend academic bishop cricket bundle tofu goat apart victim enlarge program behavior permit course armed jerky faint language modern",
+            "extra extend academic acne away best indicate impact square oasis prospect painting voting guest either argue username racism enemy eclipse",
+            "extra extend academic arcade born dive legal hush gross briefing talent drug much home firefly toxic analysis idea umbrella slice",
+        ]
+        word_count = len(mnemonics[0].split(" "))
+
+        ret = self.client.call_raw(
+            proto.RecoveryDevice(
+                passphrase_protection=False, pin_protection=False, label="label"
+            )
+        )
+
+        # Confirm Recovery
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_yes()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Homescreen - consider aborting process
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_no()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Homescreen - but then bail out in the warning
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_no()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Homescreen - click Enter
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_yes()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Enter word count
+        assert ret == proto.ButtonRequest(
+            code=proto.ButtonRequestType.MnemonicWordCount
+        )
+        self.client.debug.input(str(word_count))
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Homescreen
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_yes()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Enter first share
+        assert ret == proto.ButtonRequest(code=proto.ButtonRequestType.MnemonicInput)
+        self.client.transport.write(proto.ButtonAck())
+        for word in mnemonics[0].split(" "):
+            time.sleep(1)
+            self.client.debug.input(word)
+        ret = self.client.transport.read()
+
+        # Homescreen
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_yes()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        for i in range(5):
+            assert ret == proto.ButtonRequest(
+                code=proto.ButtonRequestType.MnemonicInput
+            )
+            self.client.transport.write(proto.ButtonAck())
+            time.sleep(1)
+            if i == 0:
+                # enter first word wrong (different from previous share)
+                self.client.debug.input(mnemonics[0].split(" ")[-1])
+            elif i == 1:
+                # enter second word wrong (different from previous share)
+                self.client.debug.input(mnemonics[0].split(" ")[0])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[-1])
+            elif i == 2:
+                # enter third word wrong (different from previous share)
+                self.client.debug.input(mnemonics[0].split(" ")[0])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[1])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[-1])
+            elif i == 3:
+                # enter fourth word wrong (same as previous share)
+                self.client.debug.input(mnemonics[0].split(" ")[0])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[1])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[2])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[3])
+            elif i == 4:
+                # enter an invalid share
+                self.client.debug.input(mnemonics[0].split(" ")[0])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[1])
+                time.sleep(1)
+                self.client.debug.input(mnemonics[0].split(" ")[2])
+                time.sleep(1)
+                for _ in range(17):
+                    self.client.debug.input("academic")
+                    time.sleep(1)
+            ret = self.client.transport.read()
+
+            # Confirm warning message
+            assert isinstance(ret, proto.ButtonRequest)
+            assert ret == proto.ButtonRequest(proto.ButtonRequestType.Warning)
+            self.client.debug.press_yes()
+            ret = self.client.call_raw(proto.ButtonAck())
+
+        # TODO: do we want to do this? it will add 40s+ to testing time in case of 3of6
+        # enter rest of shares properly
+        mnemonics.pop(0)
+        for mnemonic in mnemonics:
+            # Enter mnemonic words
+            assert ret == proto.ButtonRequest(
+                code=proto.ButtonRequestType.MnemonicInput
+            )
+            self.client.transport.write(proto.ButtonAck())
+            for word in mnemonic.split(" "):
+                time.sleep(1)
+                self.client.debug.input(word)
+            ret = self.client.transport.read()
+
+            if mnemonic != mnemonics[-1]:
+                # Homescreen
+                assert isinstance(ret, proto.ButtonRequest)
+                self.client.debug.press_yes()
+                ret = self.client.call_raw(proto.ButtonAck())
+
+        # Confirm success
+        assert isinstance(ret, proto.ButtonRequest)
+        self.client.debug.press_yes()
+        ret = self.client.call_raw(proto.ButtonAck())
+
+        # Workflow succesfully ended
+        assert ret == proto.Success(message="Device recovered")
