@@ -9,7 +9,7 @@ from apps.common import storage
 from apps.common.mnemonic import bip39, slip39
 
 if False:
-    from typing import Any, Tuple
+    from typing import Any, Optional, Tuple
 
 TYPE_BIP39 = const(0)
 TYPE_SLIP39 = const(1)
@@ -17,16 +17,25 @@ TYPE_SLIP39 = const(1)
 TYPES_WORD_COUNT = {12: bip39, 18: bip39, 24: bip39, 20: slip39, 33: slip39}
 
 
-def get() -> Tuple[bytes, int]:
-    mnemonic_secret = storage.device.get_mnemonic_secret()
+def get() -> Tuple[Optional[bytes], int]:
+    return get_secret(), get_type()
+
+
+def get_secret() -> Optional[bytes]:
+    return storage.device.get_mnemonic_secret()
+
+
+def get_type() -> int:
     mnemonic_type = storage.device.get_mnemonic_type() or TYPE_BIP39
     if mnemonic_type not in (TYPE_BIP39, TYPE_SLIP39):
         raise RuntimeError("Invalid mnemonic type")
-    return mnemonic_secret, mnemonic_type
+    return mnemonic_type
 
 
 def get_seed(passphrase: str = "", progress_bar: bool = True) -> bytes:
     mnemonic_secret, mnemonic_type = get()
+    if mnemonic_secret is None:
+        raise ValueError("Mnemonic not set")
     if mnemonic_type == TYPE_BIP39:
         return bip39.get_seed(mnemonic_secret, passphrase, progress_bar)
     elif mnemonic_type == TYPE_SLIP39:
@@ -34,7 +43,7 @@ def get_seed(passphrase: str = "", progress_bar: bool = True) -> bytes:
     raise ValueError("Unknown mnemonic type")
 
 
-def dry_run(secret: bytes) -> None:
+def dry_run(secret: bytes) -> Success:
     digest_input = sha256(secret).digest()
     stored, _ = get()
     digest_stored = sha256(stored).digest()
