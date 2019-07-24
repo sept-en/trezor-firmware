@@ -1,11 +1,9 @@
 from trezor.crypto import beam
-
-from trezor.messages.BeamSignTransaction import BeamSignTransaction
 from trezor.messages.BeamSignedTransaction import BeamSignedTransaction
 
-from apps.common import storage
-from apps.beam.layout import *
+from apps.beam.layout import beam_confirm_message
 from apps.beam.nonce import consume_nonce
+from apps.common import storage
 
 
 async def sign_transaction(ctx, msg):
@@ -15,36 +13,55 @@ async def sign_transaction(ctx, msg):
     sk_total, value_transferred = sign_tx_part_1(
         tm,
         mnemonic,
-        msg.inputs, msg.outputs,
+        msg.inputs,
+        msg.outputs,
         msg.kernel_params.fee,
-        msg.kernel_params.min_height, msg.kernel_params.max_height,
-        msg.kernel_params.commitment.x, msg.kernel_params.commitment.y,
-        msg.kernel_params.multisig_nonce.x, msg.kernel_params.multisig_nonce.y,
+        msg.kernel_params.min_height,
+        msg.kernel_params.max_height,
+        msg.kernel_params.commitment.x,
+        msg.kernel_params.commitment.y,
+        msg.kernel_params.multisig_nonce.x,
+        msg.kernel_params.multisig_nonce.y,
         msg.nonce_slot,
-        msg.offset_sk)
+        msg.offset_sk,
+    )
 
-    tx_action_message = 'RECEIVE' if value_transferred <= 0 else 'TRANSFER'
-    await beam_confirm_message(ctx, tx_action_message + ': ', str(abs(value_transferred)), False)
+    tx_action_message = "RECEIVE" if value_transferred <= 0 else "TRANSFER"
+    await beam_confirm_message(
+        ctx, tx_action_message + ": ", str(abs(value_transferred)), False
+    )
 
     signature, is_signed = sign_tx_part_2(tm, sk_total, msg.nonce_slot)
 
     return BeamSignedTransaction(signature=signature)
 
-def sign_tx_part_1(transaction_maker,
-                   mnemonic,
-                   inputs, outputs,
-                   fee,
-                   min_height, max_height,
-                   commitment_x, commitment_y,
-                   multisig_nonce_x, multisig_nonce_y,
-                   nonce_slot, offset_sk):
+
+def sign_tx_part_1(
+    transaction_maker,
+    mnemonic,
+    inputs,
+    outputs,
+    fee,
+    min_height,
+    max_height,
+    commitment_x,
+    commitment_y,
+    multisig_nonce_x,
+    multisig_nonce_y,
+    nonce_slot,
+    offset_sk,
+):
     transaction_maker.set_transaction_data(
         fee,
-        min_height, max_height,
-        commitment_x, commitment_y,
-        multisig_nonce_x, multisig_nonce_y,
+        min_height,
+        max_height,
+        commitment_x,
+        commitment_y,
+        multisig_nonce_x,
+        multisig_nonce_y,
         nonce_slot,
-        offset_sk)
+        offset_sk,
+    )
 
     for input in inputs:
         kidv = beam.KeyIDV()
@@ -63,10 +80,10 @@ def sign_tx_part_1(transaction_maker,
 
     return (sk_total, value_transferred)
 
+
 def sign_tx_part_2(transaction_maker, sk_total, nonce_slot):
     signature = bytearray(32)
     nonce = consume_nonce(nonce_slot)
     is_signed = transaction_maker.sign_transaction_part_2(sk_total, nonce, signature)
 
     return (signature, is_signed)
-

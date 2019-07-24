@@ -8,11 +8,11 @@ from trezor.pin import pin_to_int
 from trezor.ui.loader import LoadingAnimation
 from trezor.ui.text import Text
 
+from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 from apps.common import mnemonic, storage
 from apps.common.confirm import require_confirm
 from apps.management.change_pin import request_pin_confirm
 from apps.management.common import layout
-from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 
 if __debug__:
     from apps import debug

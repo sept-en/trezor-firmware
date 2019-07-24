@@ -1,5 +1,5 @@
 from trezor import config, ui, wire
-from trezor.crypto import slip39, random
+from trezor.crypto import random, slip39
 from trezor.messages import ButtonRequestType
 from trezor.messages.ButtonAck import ButtonAck
 from trezor.messages.ButtonRequest import ButtonRequest
@@ -11,11 +11,11 @@ from trezor.ui.mnemonic_slip39 import Slip39Keyboard
 from trezor.ui.text import Text
 from trezor.ui.word_select import WordSelector
 
+from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 from apps.common import mnemonic, storage
 from apps.common.confirm import require_confirm
 from apps.homescreen.homescreen import display_homescreen
 from apps.management.change_pin import request_pin_ack, request_pin_confirm
-from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 
 if __debug__:
     from apps.debug import confirm_signal, input_signal

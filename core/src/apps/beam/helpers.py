@@ -1,21 +1,23 @@
 from trezor.crypto import beam
-from trezor.messages.BeamSignature import BeamSignature
 
 from apps.common import storage
 
-from apps.beam.layout import *
 
 def BBS_KEY():
     return 1113748301
 
+
 def beam_app_id():
     return 19
+
 
 def get_master_nonce_idx():
     return 0
 
+
 def bin_to_str(binary_data):
-    return ''.join('{:02x}'.format(x) for x in binary_data)
+    return "".join("{:02x}".format(x) for x in binary_data)
+
 
 def get_beam_kdf(mnemonic=None):
     if mnemonic is None:
@@ -27,6 +29,7 @@ def get_beam_kdf(mnemonic=None):
     cofactor = bytearray(32)
     beam.seed_to_kdf(seed, seed_size, secret_key, cofactor)
     return (secret_key, cofactor)
+
 
 def get_beam_sk(kid_idx, kid_sub_idx=0, kdf=None):
     # Generate hash id
@@ -46,6 +49,7 @@ def get_beam_sk(kid_idx, kid_sub_idx=0, kdf=None):
 
     return res_sk
 
+
 def get_beam_pk(kid_idx, kid_sub_idx=0, kdf=None):
     # Secret key to public key
     public_key_x = bytearray(32)
@@ -55,10 +59,15 @@ def get_beam_pk(kid_idx, kid_sub_idx=0, kdf=None):
 
     return (public_key_x, int(public_key_y[0]))
 
+
 def is_valid_beam_message(signature, public_key, message):
-    is_valid = beam.is_valid_signature(message,
-                                       signature.nonce_pub.x, int(signature.nonce_pub.y),
-                                       signature.sign_k,
-                                       public_key.x, int(public_key.y))
+    is_valid = beam.is_valid_signature(
+        message,
+        signature.nonce_pub.x,
+        int(signature.nonce_pub.y),
+        signature.sign_k,
+        public_key.x,
+        int(public_key.y),
+    )
 
     return is_valid
