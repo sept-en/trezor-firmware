@@ -14,31 +14,34 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+
 import pytest
-import binascii
 
 from trezorlib import beam, messages
 
 from .common import TrezorTest
 
+
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
 class TestBeamGenerateRangeproof(TrezorTest):
-    @pytest.mark.parametrize("idx, type, sub_idx, value, is_public", [
-        (0, 0, 0, 5, True),
-        (1, 0, 0, 8, True),
-        (2, 1, 1, 3, True),
-        (0, 0, 0, 4, False)
-    ])
+    @pytest.mark.parametrize(
+        "idx, type, sub_idx, value, is_public",
+        [
+            (0, 0, 0, 5, True),
+            (1, 0, 0, 8, True),
+            (2, 1, 1, 3, True),
+            (0, 0, 0, 4, False),
+        ],
+    )
     def test_generate_rangeproof(self, client, idx, type, sub_idx, value, is_public):
         self.setup_mnemonic_allallall()
 
-        expected_responses = [
-            messages.BeamRangeproofData()
-        ]
+        expected_responses = [messages.BeamRangeproofData()]
 
         with self.client:
             self.client.set_expected_responses(expected_responses)
-            rp_data = beam.generate_rangeproof(self.client, idx, type, sub_idx, value, is_public)
-            assert(rp_data.is_public == is_public)
-
+            rp_data = beam.generate_rangeproof(
+                self.client, idx, type, sub_idx, value, is_public
+            )
+            assert rp_data.is_public == is_public

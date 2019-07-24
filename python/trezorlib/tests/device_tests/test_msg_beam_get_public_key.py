@@ -14,8 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+
 import pytest
-import binascii
 
 from trezorlib import beam, messages
 
@@ -35,31 +35,36 @@ VALID_VECTORS = [
     (10, 3, "706bc1d21de9d4fdf4daef73b7774cb7e869e454a7776d8116c0ce86f9427577", 0),
 ]
 
+
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
 class TestBeamGetPublicKey(TrezorTest):
-    @pytest.mark.parametrize("idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS)
+    @pytest.mark.parametrize(
+        "idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS
+    )
     def test_generate_pk(self, client, idx, sub_idx, expected_pk_x, expected_pk_y):
         self.setup_mnemonic_allallall()
 
-        expected_responses = [
-            messages.BeamECCPoint()
-        ]
+        expected_responses = [messages.BeamECCPoint()]
 
         with self.client:
             self.client.set_expected_responses(expected_responses)
             pk = beam.get_public_key(self.client, idx, sub_idx, False)
-            assert(pk.x.hex() == expected_pk_x)
-            assert(int(pk.y) == expected_pk_y)
+            assert pk.x.hex() == expected_pk_x
+            assert int(pk.y) == expected_pk_y
 
-    @pytest.mark.parametrize("idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS)
-    def test_generate_pk_with_display(self, client, idx, sub_idx, expected_pk_x, expected_pk_y):
+    @pytest.mark.parametrize(
+        "idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS
+    )
+    def test_generate_pk_with_display(
+        self, client, idx, sub_idx, expected_pk_x, expected_pk_y
+    ):
         self.setup_mnemonic_allallall()
 
         expected_responses = [
             messages.ButtonRequest(code=messages.ButtonRequestType.PublicKey),
             messages.ButtonRequest(code=messages.ButtonRequestType.PublicKey),
-            messages.BeamECCPoint()
+            messages.BeamECCPoint(),
         ]
 
         def input_flow():
@@ -68,11 +73,9 @@ class TestBeamGetPublicKey(TrezorTest):
             yield
             self.client.debug.press_yes()
 
-
         with self.client:
             self.client.set_expected_responses(expected_responses)
             self.client.set_input_flow(input_flow)
             pk = beam.get_public_key(self.client, idx, sub_idx, True)
-            assert(pk.x.hex() == expected_pk_x)
-            assert(int(pk.y) == expected_pk_y)
-
+            assert pk.x.hex() == expected_pk_x
+            assert int(pk.y) == expected_pk_y

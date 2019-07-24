@@ -20,9 +20,8 @@ from trezorlib import beam, messages
 
 from .common import TrezorTest
 
-SLOTS_TO_TEST = [
-    ( 1 ), ( 2 ), ( 3 ), ( 4 ), ( 5 ), ( 6 ),  ( 7 ), ( 8 ), ( 9 ), ( 10 )
-]
+SLOTS_TO_TEST = [(1), (2), (3), (4), (5), (6), (7), (8), (9), (10)]
+
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
@@ -31,9 +30,7 @@ class TestBeamGenerateNonce(TrezorTest):
     def test_generate_nonce(self, client, slot):
         self.setup_mnemonic_allallall()
 
-        expected_responses = [
-            messages.BeamECCPoint()
-        ]
+        expected_responses = [messages.BeamECCPoint()]
 
         with client:
             client.set_expected_responses(expected_responses)
@@ -51,21 +48,20 @@ class TestBeamGetNonceImage(TrezorTest):
             messages.BeamECCPoint(),
             messages.BeamECCPoint(),
             messages.BeamECCPoint(),
-            messages.BeamECCPoint()
+            messages.BeamECCPoint(),
         ]
 
         with client:
             client.set_expected_responses(expected_responses)
             image1 = beam.get_nonce_image(client, slot)
             image2 = beam.get_nonce_image(client, slot)
-            assert(image1.x.hex() == image2.x.hex())
-            assert(image1.y == image2.y)
+            assert image1.x.hex() == image2.x.hex()
+            assert image1.y == image2.y
 
             # Generate new nonce and check new one is not the same
             image3 = beam.generate_nonce(client, slot)
-            assert(not(image3.x.hex() == image2.x.hex()))
+            assert not (image3.x.hex() == image2.x.hex())
             # But next one is the same
             image4 = beam.get_nonce_image(client, slot)
-            assert(image3.x.hex() == image4.x.hex())
-            assert(image3.y == image4.y)
-
+            assert image3.x.hex() == image4.x.hex()
+            assert image3.y == image4.y

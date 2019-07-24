@@ -14,8 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+
 import pytest
-import binascii
 
 from trezorlib import beam, messages
 
@@ -34,7 +34,7 @@ class TestBeamGetOwnerKeyMessage(TrezorTest):
             messages.ButtonRequest(),
             messages.ButtonRequest(),
             messages.ButtonRequest(),
-            messages.BeamOwnerKey()
+            messages.BeamOwnerKey(),
         ]
 
         def input_flow():
@@ -51,7 +51,7 @@ class TestBeamGetOwnerKeyMessage(TrezorTest):
             self.client.set_input_flow(input_flow)
 
             owner_key = beam.get_owner_key(self.client, True)
-            assert(owner_key.key.decode('utf-8')
-                   == 'i785WRTwjoq1CmHBAXnogoYAv1GtcjxCd0aPbt2Dg5SrluylUtUzNu9YG0bhfG+j3MK7cvGLpqnj/AD5jubFk7kfUFcemCuihCqwsKb42Fc9XveGiAZHmOcr9I1kwQIb68+jNxA8Yy+iTTy2\n')
-
-
+            assert (
+                owner_key.key.decode("utf-8")
+                == "i785WRTwjoq1CmHBAXnogoYAv1GtcjxCd0aPbt2Dg5SrluylUtUzNu9YG0bhfG+j3MK7cvGLpqnj/AD5jubFk7kfUFcemCuihCqwsKb42Fc9XveGiAZHmOcr9I1kwQIb68+jNxA8Yy+iTTy2\n"
+            )

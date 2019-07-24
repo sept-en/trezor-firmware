@@ -14,8 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+
 import pytest
-import binascii
 
 from trezorlib import beam, messages
 
@@ -25,7 +25,7 @@ KERNEL_PARAMS = {
     "fee": 1,
     "commitment": {
         "x": "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
-        "y": 1
+        "y": 1,
     },
     "min_height": 1,
     "max_height": 5,
@@ -34,81 +34,50 @@ KERNEL_PARAMS = {
     "multisig": {
         "nonce": {
             "x": "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
-            "y": 1
+            "y": 1,
         },
         "excess": {
             "x": "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
-            "y": 1
-        }
-    }
+            "y": 1,
+        },
+    },
 }
 
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
 class TestBeamSignTxMessage(TrezorTest):
-    @pytest.mark.parametrize("inputs, outputs, offset_sk, nonce_slot", [
-        (
-            # Inputs
-            [
-                {
-                    "idx": 1,
-                    "type": 1,
-                    "sub_idx": 1,
-                    "value": 2
-                },
-                {
-                    "idx": 2,
-                    "type": 2,
-                    "sub_idx": 2,
-                    "value": 5
-                }
-            ],
-            # Outputs
-            [
-                {
-                    "idx": 3,
-                    "type": 3,
-                    "sub_idx": 3,
-                    "value": 3
-                }
-            ],
-            # Offset sk
-            "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
-            # Nonce slot
-            2
-        ),
-        (
-            # Inputs
-            [
-                {
-                    "idx": 1,
-                    "type": 1,
-                    "sub_idx": 1,
-                    "value": 2
-                },
-                {
-                    "idx": 2,
-                    "type": 2,
-                    "sub_idx": 2,
-                    "value": 5
-                }
-            ],
-            # Outputs
-            [
-                {
-                    "idx": 3,
-                    "type": 3,
-                    "sub_idx": 3,
-                    "value": 20
-                }
-            ],
-            # Offset sk
-            "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
-            # Nonce slot
-            1
-        ),
-    ])
+    @pytest.mark.parametrize(
+        "inputs, outputs, offset_sk, nonce_slot",
+        [
+            (
+                # Inputs
+                [
+                    {"idx": 1, "type": 1, "sub_idx": 1, "value": 2},
+                    {"idx": 2, "type": 2, "sub_idx": 2, "value": 5},
+                ],
+                # Outputs
+                [{"idx": 3, "type": 3, "sub_idx": 3, "value": 3}],
+                # Offset sk
+                "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
+                # Nonce slot
+                2,
+            ),
+            (
+                # Inputs
+                [
+                    {"idx": 1, "type": 1, "sub_idx": 1, "value": 2},
+                    {"idx": 2, "type": 2, "sub_idx": 2, "value": 5},
+                ],
+                # Outputs
+                [{"idx": 3, "type": 3, "sub_idx": 3, "value": 20}],
+                # Offset sk
+                "0x12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef12abcdef",
+                # Nonce slot
+                1,
+            ),
+        ],
+    )
     def test_sign_tx(self, client, inputs, outputs, offset_sk, nonce_slot):
         self.setup_mnemonic_allallall()
 
@@ -119,7 +88,7 @@ class TestBeamSignTxMessage(TrezorTest):
 
         expected_responses = [
             messages.ButtonRequest(),
-            messages.BeamSignedTransaction()
+            messages.BeamSignedTransaction(),
         ]
 
         def input_flow():
@@ -130,8 +99,5 @@ class TestBeamSignTxMessage(TrezorTest):
             self.client.set_expected_responses(expected_responses)
             self.client.set_input_flow(input_flow)
             signed_transaction = beam.sign_tx(
-                self.client,
-                inputs, outputs,
-                offset_sk, nonce_slot,
-                kernel_params)
-
+                self.client, inputs, outputs, offset_sk, nonce_slot, kernel_params
+            )
