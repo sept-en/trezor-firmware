@@ -58,7 +58,8 @@ class KeyIDV:
         Generate BEAM hash id.
         '''
 
-    def seed_to_kdf(seed: bytes, seed_size: int, out_gen32: bytes, out_cofactor: bytes):
+    def seed_to_kdf(seed: bytes, seed_size: int, out_gen32: bytes, out_cofactor:
+    bytes):
         '''
         Transform seed to BEAM KDF
         '''
