@@ -51,8 +51,8 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
     secret = _compute_secret_from_entropy(int_entropy, ext_entropy, msg.strength)
 
     if is_slip39_simple:
-        storage.slip39.set_identifier(slip39.generate_random_identifier())
-        storage.slip39.set_iteration_exponent(slip39.DEFAULT_ITERATION_EXPONENT)
+        storage.device.set_slip39_identifier(slip39.generate_random_identifier())
+        storage.device.set_slip39_iteration_exponent(slip39.DEFAULT_ITERATION_EXPONENT)
 
     beam_nonce_seed = random.bytes(32)
     create_beam_master_nonce(beam_nonce_seed)
@@ -79,13 +79,17 @@ async def reset_device(ctx: wire.Context, msg: ResetDevice) -> Success:
         label=msg.label, use_passphrase=msg.passphrase_protection
     )
     if is_slip39_simple:
-        mnemonic.slip39.store(
-            secret=secret, needs_backup=msg.skip_backup, no_backup=msg.no_backup
+        storage.device.store_mnemonic_secret(
+            secret,
+            mnemonic.TYPE_SLIP39,
+            needs_backup=msg.skip_backup,
+            no_backup=msg.no_backup,
         )
     else:
         # in BIP-39 we store mnemonic string instead of the secret
-        mnemonic.bip39.store(
-            secret=bip39.from_data(secret).encode(),
+        storage.device.store_mnemonic_secret(
+            bip39.from_data(secret).encode(),
+            mnemonic.TYPE_BIP39,
             needs_backup=msg.skip_backup,
             no_backup=msg.no_backup,
         )
@@ -107,7 +111,9 @@ async def backup_slip39_wallet(ctx: wire.Context, secret: bytes) -> None:
     threshold = await layout.slip39_prompt_threshold(ctx, shares_count)
 
     # generate the mnemonics
-    mnemonics = mnemonic.slip39.generate_from_secret(secret, shares_count, threshold)
+    mnemonics = slip39.generate_single_group_mnemonics_from_data(
+        secret, storage.device.get_slip39_identifier(), threshold, shares_count
+    )
 
     # show and confirm individual shares
     await layout.slip39_show_checklist_show_shares(ctx, shares_count, threshold)
