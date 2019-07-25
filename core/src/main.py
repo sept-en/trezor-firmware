@@ -41,6 +41,7 @@ def _boot_default():
     import apps.cardano
     import apps.tezos
     import apps.eos
+    import apps.beam
 
     if __debug__:
         import apps.debug
@@ -60,6 +61,7 @@ def _boot_default():
     apps.cardano.boot()
     apps.tezos.boot()
     apps.eos.boot()
+    apps.beam.boot()
     if __debug__:
         apps.debug.boot()
     else:
