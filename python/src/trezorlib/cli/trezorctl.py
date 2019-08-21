@@ -31,11 +31,8 @@ import click
 import requests
 
 from trezorlib import (
-<<<<<<< HEAD:python/trezorctl
     beam,
-=======
     binance,
->>>>>>> upstream/master:python/src/trezorlib/cli/trezorctl.py
     btc,
     cardano,
     coins,
