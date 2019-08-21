@@ -361,25 +361,30 @@ void layoutConfirmOmni(const uint8_t *data, uint32_t size) {
     desc = _("Simple send of ");
     REVERSE32(*(const uint32_t *)(data + 8), currency);
     const char *suffix = " UNKN";
+    bool divisible = false;
     switch (currency) {
       case 1:
         suffix = " OMNI";
+        divisible = true;
         break;
       case 2:
         suffix = " tOMNI";
+        divisible = true;
         break;
       case 3:
         suffix = " MAID";
+        divisible = false;
         break;
       case 31:
         suffix = " USDT";
+        divisible = true;
         break;
     }
     uint64_t amount_be, amount;
     memcpy(&amount_be, data + 12, sizeof(uint64_t));
     REVERSE64(amount_be, amount);
-    bn_format_uint64(amount, NULL, suffix, BITCOIN_DIVISIBILITY, 0, false,
-                     str_out, sizeof(str_out));
+    bn_format_uint64(amount, NULL, suffix, divisible ? BITCOIN_DIVISIBILITY : 0,
+                     0, false, str_out, sizeof(str_out));
   } else {
     desc = _("Unknown transaction");
     str_out[0] = 0;
@@ -539,8 +544,11 @@ void layoutResetWord(const char *word, int pass, int word_pos, bool last) {
   oledDrawString(left, 0 * 9, action, FONT_STANDARD);
   oledDrawString(left, 2 * 9, word_pos < 10 ? index_str + 1 : index_str,
                  FONT_STANDARD);
-  oledDrawString(left, 3 * 9, word, FONT_STANDARD | FONT_DOUBLE);
-  oledHLine(OLED_HEIGHT - 13);
+  oledDrawStringCenter(OLED_WIDTH / 2, 4 * 9 - 3, word,
+                       FONT_FIXED | FONT_DOUBLE);
+  // 30 is the maximum pixels used for a pixel row in the BIP39 word "abstract"
+  oledSCA(4 * 9 - 3 - 2, 4 * 9 - 3 + 15 + 2, 30);
+  oledInvert(0, 4 * 9 - 3 - 2, OLED_WIDTH - 1, 4 * 9 - 3 + 15 + 2);
   layoutButtonYes(btnYes);
   oledRefresh();
 }

@@ -26,7 +26,9 @@ class CoinInfo:
         force_bip143: bool,
         bip115: bool,
         decred: bool,
+        negative_fee: bool,
         curve_name: str,
+        confidential_assets: dict,
     ):
         self.coin_name = coin_name
         self.coin_shortcut = coin_shortcut
@@ -45,7 +47,9 @@ class CoinInfo:
         self.force_bip143 = force_bip143
         self.bip115 = bip115
         self.decred = decred
+        self.negative_fee = negative_fee
         self.curve_name = curve_name
+        self.confidential_assets = confidential_assets
         if curve_name == "secp256k1-groestl":
             self.b58_hash = groestl512d_32
             self.sign_hash_double = False
@@ -77,6 +81,11 @@ def hexfmt(x):
     else:
         return "0x{:08x}".format(x)
 
+def optional_dict(x):
+    if x is None:
+        return None
+    return dict(x)
+
 ATTRIBUTES = (
     ("coin_name", lambda _: "name"),
     ("coin_shortcut", black_repr),
@@ -95,7 +104,9 @@ ATTRIBUTES = (
     ("force_bip143", bool),
     ("bip115", bool),
     ("decred", bool),
+    ("negative_fee", bool),
     ("curve_name", lambda r: repr(r.replace("_", "-"))),
+    ("confidential_assets", optional_dict),
 )
 %>\
 def by_name(name: str) -> CoinInfo:

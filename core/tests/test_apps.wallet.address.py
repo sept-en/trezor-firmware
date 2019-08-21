@@ -91,7 +91,7 @@ class TestAddress(unittest.TestCase):
 
     def test_multisig_address_p2sh(self):
         # # test data from
-        # # http://www.soroushjp.com/2014/12/20/bitcoin-multisig-the-hard-way-understanding-raw-multisignature-bitcoin-transactions/
+        # # https://www.soroushjp.com/2014/12/20/bitcoin-multisig-the-hard-way-understanding-raw-multisignature-bitcoin-transactions/
         # # commented out because uncompressed public keys are not supported
         # coin = coins.by_name('Bitcoin')
         # pubkeys = [
@@ -109,6 +109,10 @@ class TestAddress(unittest.TestCase):
         ]
         address = address_multisig_p2sh(pubkeys, 2, coin)
         self.assertEqual(address, '39bgKC7RFbpoCRbtD5KEdkYKtNyhpsNa3Z')
+
+        for invalid_m in (-1, 0, len(pubkeys) + 1, 16):
+            with self.assertRaises(scripts.ScriptsError):
+                address_multisig_p2sh(pubkeys, invalid_m, coin)
 
     def test_multisig_address_p2wsh_in_p2sh(self):
         # test data from

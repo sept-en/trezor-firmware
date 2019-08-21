@@ -45,6 +45,10 @@ void pinmatrix_draw(const char *text) {
                      bmp_digits[k]);
     }
   }
+  for (int i = 0; i < 3; i++) {
+    // 36 is the maximum pixels used for a pin matrix pixel row
+    oledSCA(12 + i * (h + pad), 12 + i * (h + pad) + h - 1, 36);
+  }
   oledRefresh();
 }
 

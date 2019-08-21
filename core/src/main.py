@@ -15,7 +15,7 @@ usb.bus.open()
 utils.set_mode_unprivileged()
 
 
-def _boot_recovery():
+def _boot_recovery() -> None:
     # load applications
     import apps.homescreen
 
@@ -27,7 +27,7 @@ def _boot_recovery():
     loop.schedule(recovery_homescreen())
 
 
-def _boot_default():
+def _boot_default() -> None:
     # load applications
     import apps.homescreen
     import apps.management
@@ -42,6 +42,7 @@ def _boot_default():
     import apps.tezos
     import apps.eos
     import apps.beam
+    import apps.binance
 
     if __debug__:
         import apps.debug
@@ -62,6 +63,7 @@ def _boot_default():
     apps.tezos.boot()
     apps.eos.boot()
     apps.beam.boot()
+    apps.binance.boot()
     if __debug__:
         apps.debug.boot()
     else:
@@ -70,7 +72,7 @@ def _boot_default():
     # run main event loop and specify which screen is the default
     from apps.homescreen.homescreen import homescreen
 
-    workflow.startdefault(homescreen)
+    workflow.start_default(homescreen)
 
 
 from trezor import loop, wire, workflow
