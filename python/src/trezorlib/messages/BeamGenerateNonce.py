@@ -2,29 +2,25 @@
 # fmt: off
 from .. import protobuf as p
 
-from .BeamECCPoint import BeamECCPoint
-
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal  # noqa: F401
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
 
 
-class BeamSignature(p.MessageType):
-    MESSAGE_WIRE_TYPE = 803
+class BeamGenerateNonce(p.MessageType):
+    MESSAGE_WIRE_TYPE = 810
 
     def __init__(
         self,
-        nonce_pub: BeamECCPoint = None,
-        sign_k: bytes = None,
+        slot: int = None,
     ) -> None:
-        self.nonce_pub = nonce_pub
-        self.sign_k = sign_k
+        self.slot = slot
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('nonce_pub', BeamECCPoint, 0),
-            2: ('sign_k', p.BytesType, 0),
+            1: ('slot', p.UVarintType, 0),
         }

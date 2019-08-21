@@ -5,21 +5,22 @@ from .. import protobuf as p
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal  # noqa: F401
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
 
 
-class BeamGetNoncePublic(p.MessageType):
-    MESSAGE_WIRE_TYPE = 816
+class BeamGetOwnerKey(p.MessageType):
+    MESSAGE_WIRE_TYPE = 807
 
     def __init__(
         self,
-        slot: int = None,
+        show_display: bool = None,
     ) -> None:
-        self.slot = slot
+        self.show_display = show_display
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('slot', p.UVarintType, 0),
+            1: ('show_display', p.BoolType, 0),
         }

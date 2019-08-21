@@ -5,24 +5,22 @@ from .. import protobuf as p
 if __debug__:
     try:
         from typing import Dict, List, Optional
+        from typing_extensions import Literal  # noqa: F401
     except ImportError:
         Dict, List, Optional = None, None, None  # type: ignore
 
 
-class BeamECCPoint(p.MessageType):
-    MESSAGE_WIRE_TYPE = 811
+class BeamOwnerKey(p.MessageType):
+    MESSAGE_WIRE_TYPE = 808
 
     def __init__(
         self,
-        x: bytes = None,
-        y: bool = None,
+        key: bytes = None,
     ) -> None:
-        self.x = x
-        self.y = y
+        self.key = key
 
     @classmethod
     def get_fields(cls) -> Dict:
         return {
-            1: ('x', p.BytesType, 0),
-            2: ('y', p.BoolType, 0),
+            1: ('key', p.BytesType, 0),
         }
