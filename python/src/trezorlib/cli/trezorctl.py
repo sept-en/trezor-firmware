@@ -2008,7 +2008,6 @@ def beam_sign_tx(connect, file):
     return signed_transaction
 
 
-
 #
 # Binance functions
 #
