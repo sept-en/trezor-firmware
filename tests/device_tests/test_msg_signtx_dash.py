@@ -14,6 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+import pytest
+
 from trezorlib import btc, messages as proto
 from trezorlib.tools import parse_path
 
@@ -23,6 +25,7 @@ from .tx_cache import tx_cache
 TX_API = tx_cache("Dash")
 
 
+@pytest.mark.altcoin
 class TestMsgSigntxDash(TrezorTest):
     def test_send_dash(self):
         self.setup_mnemonic_allallall()

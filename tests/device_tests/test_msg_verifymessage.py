@@ -16,6 +16,8 @@
 
 import base64
 
+import pytest
+
 from trezorlib import btc
 
 from .common import TrezorTest
@@ -48,6 +50,7 @@ class TestMsgVerifymessage(TrezorTest):
         )
         assert ret is True
 
+    @pytest.mark.altcoin
     def test_message_grs(self):
         self.setup_mnemonic_allallall()
         ret = btc.verify_message(
@@ -172,6 +175,7 @@ class TestMsgVerifymessage(TrezorTest):
         )
         assert res is False
 
+    @pytest.mark.altcoin
     def test_message_verify_bcash(self):
         self.setup_mnemonic_nopin_nopassphrase()
         res = btc.verify_message(

@@ -14,6 +14,8 @@
 # You should have received a copy of the License along with this library.
 # If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.
 
+import pytest
+
 from trezorlib import btc, ckd_public as bip32, messages as proto
 from trezorlib.tools import H_
 
@@ -70,6 +72,7 @@ class TestMsgGetpublickey(TrezorTest):
             == "xpub6A3FoZqQEK6iwLZ4HFkqSo5fb35BH4bpjC4SPZ63prfLdGYPwYxEuC6o91bUvFFdMzKWe5rs3axHRUjxJaSvBnKKFtnfLwDACRxPxabsv2r"
         )
 
+    @pytest.mark.altcoin
     def test_ltc(self):
         self.setup_mnemonic_nopin_nopassphrase()
         assert (

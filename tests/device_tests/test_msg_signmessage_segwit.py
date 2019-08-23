@@ -16,6 +16,8 @@
 
 import base64
 
+import pytest
+
 from trezorlib import btc, messages as proto
 from trezorlib.tools import parse_path
 
@@ -53,6 +55,7 @@ class TestMsgSignmessageSegwit(TrezorTest):
             == "249e23edf0e4e47ff1dec27f32cd78c50e74ef018ee8a6adf35ae17c7a9b0dd96f48b493fd7dbab03efb6f439c6383c9523b3bbc5f1a7d158a6af90ab154e9be80"
         )
 
+    @pytest.mark.altcoin
     def test_sign_grs(self):
         self.setup_mnemonic_allallall()
         sig = btc.sign_message(
