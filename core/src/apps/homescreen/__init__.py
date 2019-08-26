@@ -54,6 +54,7 @@ def get_features() -> Features:
             Feature.Stellar,
             Feature.Tezos,
             Feature.U2F,
+            Feature.Beam,
         ]
     return f
 
