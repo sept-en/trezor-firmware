@@ -34,8 +34,6 @@ CFLAGS += -DUSE_MONERO=1
 CFLAGS += -DUSE_NEM=1
 CFLAGS += -DUSE_CARDANO=1
 CFLAGS += -DBEAM_DEBUG=1
-# CFLAGS += -DBEAM_USE_TABLES=1
-# CFLAGS += -DBEAM_GENERATE_TABLES=1
 CFLAGS += $(shell pkg-config --cflags openssl)
 
 # disable certain optimizations and features when small footprint is required
@@ -71,7 +69,7 @@ SRCS  += hmac_drbg.c
 SRCS  += rfc6979.c
 SRCS  += slip39.c
 SRCS  += beam/rangeproof.c beam/oracle.c beam/inner_product.c beam/multi_mac.c beam/nonce_generator.c  beam/internal.c beam/functions.c
-SRCS  += beam/definitions.c beam/definitions_ipp.c beam/definitions_lut.c
+SRCS  += beam/definitions.c beam/definitions_ipp.c
 SRCS  += beam/lib/scalar32.c beam/lib/field_impl.c beam/lib/field_10x26_impl.c beam/lib/group_impl.c beam/lib/util.c beam/lib/vec.c
 SRCS  += beam/kernel.c beam/misc.c
 

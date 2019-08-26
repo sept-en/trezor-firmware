@@ -29,14 +29,8 @@ void point_create_nnz(SHA256_CTX *oracle, secp256k1_gej *out_gej);
 
 int export_gej_to_point(const secp256k1_gej *native_point, point_t *out_point);
 
-int create_pts(secp256k1_gej *pPts, const secp256k1_gej *in_gpos,
-               uint32_t nLevels, SHA256_CTX *oracle);
-
 void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
                           const scalar_t *sk);
-
-void generate_points(secp256k1_gej *G_pts, secp256k1_gej *J_pts,
-                     secp256k1_gej *H_pts);
 
 void signature_get_challenge(const secp256k1_gej *pt, const uint8_t *msg32,
                              scalar_t *out_scalar);

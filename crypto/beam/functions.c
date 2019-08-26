@@ -7,14 +7,6 @@
 context_t CONTEXT;
 
 void init_context(void) {
-  static uint8_t is_first_init = 1;
-  if (is_first_init) {
-    CONTEXT.generator.G_pts = NULL;
-    CONTEXT.generator.J_pts = NULL;
-    CONTEXT.generator.H_pts = NULL;
-    is_first_init = 0;
-  }
-
   CONTEXT.key.Comission = _FOURCC_FROM(fees);
   CONTEXT.key.Coinbase = _FOURCC_FROM(mine);
   CONTEXT.key.Regular = _FOURCC_FROM(norm);
@@ -27,48 +19,15 @@ void init_context(void) {
   CONTEXT.key.Decoy = _FOURCC_FROM(dcoy);
   CONTEXT.key.Treasury = _FOURCC_FROM(Tres);
 
-  free_context();
-#ifndef BEAM_USE_TABLES
   CONTEXT.generator.G_pts = get_generator_G();
   CONTEXT.generator.J_pts = get_generator_J();
   CONTEXT.generator.H_pts = get_generator_H();
-#else
-#ifndef BEAM_GENERATE_TABLES
-  CONTEXT.generator.G_pts = get_generator_lut_G();
-  CONTEXT.generator.J_pts = get_generator_lut_J();
-  CONTEXT.generator.H_pts = get_generator_lut_H();
-#else
-  CONTEXT.generator.G_pts =
-      malloc((N_LEVELS * N_POINTS_PER_LEVEL) * sizeof(secp256k1_gej));
-  CONTEXT.generator.J_pts =
-      malloc((N_LEVELS * N_POINTS_PER_LEVEL) * sizeof(secp256k1_gej));
-  CONTEXT.generator.H_pts =
-      malloc((N_LEVELS * N_POINTS_PER_LEVEL) * sizeof(secp256k1_gej));
-  generate_points(CONTEXT.generator.G_pts, CONTEXT.generator.J_pts,
-                  CONTEXT.generator.H_pts);
-#endif
-#endif
 }
 
 void free_context(void) {
-#if !defined(BEAM_USE_TABLES) || !defined(BEAM_GENERATE_TABLES)
   CONTEXT.generator.G_pts = NULL;
   CONTEXT.generator.J_pts = NULL;
   CONTEXT.generator.H_pts = NULL;
-#else
-  if (CONTEXT.generator.G_pts) {
-    free(CONTEXT.generator.G_pts);
-    CONTEXT.generator.G_pts = NULL;
-  }
-  if (CONTEXT.generator.J_pts) {
-    free(CONTEXT.generator.J_pts);
-    CONTEXT.generator.J_pts = NULL;
-  }
-  if (CONTEXT.generator.H_pts) {
-    free(CONTEXT.generator.H_pts);
-    CONTEXT.generator.H_pts = NULL;
-  }
-#endif
 }
 
 context_t *get_context(void) { return &CONTEXT; }

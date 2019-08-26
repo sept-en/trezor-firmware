@@ -106,45 +106,6 @@ int export_gej_to_point(const secp256k1_gej *native_point, point_t *out_point) {
   return 1;
 }
 
-int create_pts(secp256k1_gej *pPts, const secp256k1_gej *in_gpos,
-               uint32_t nLevels, SHA256_CTX *oracle) {
-  secp256k1_gej nums, npos, pt, gpos;
-  memcpy(&gpos, in_gpos, sizeof(secp256k1_gej));
-
-  point_create_nnz(oracle, &nums);
-
-  secp256k1_gej_add_var(&nums, &nums, &gpos, NULL);
-  npos = nums;
-
-  for (uint32_t iLev = 1;; iLev++) {
-    pt = npos;
-
-    for (uint32_t iPt = 1;; iPt++) {
-      if (secp256k1_gej_is_infinity(&pt) != 0) return 0;
-
-      *pPts++ = pt;
-
-      if (iPt == N_POINTS_PER_LEVEL) break;
-
-      secp256k1_gej_add_var(&pt, &pt, &gpos, NULL);
-    }
-
-    if (iLev == nLevels) break;
-
-    for (uint32_t i = 0; i < N_BITS_PER_LEVEL; i++) {
-      secp256k1_gej_double_var(&gpos, &gpos, NULL);
-    }
-
-    secp256k1_gej_double_var(&npos, &npos, NULL);
-    if (iLev + 1 == nLevels) {
-      secp256k1_gej_neg(&npos, &npos);
-      secp256k1_gej_add_var(&npos, &npos, &nums, NULL);
-    }
-  }
-
-  return 1;
-}
-
 void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
                           const scalar_t *sk) {
 #ifndef BEAM_GENERATE_TABLES
@@ -196,25 +157,6 @@ void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
     }
   }
 #endif
-}
-
-void generate_points(secp256k1_gej *G_pts, secp256k1_gej *J_pts,
-                     secp256k1_gej *H_pts) {
-  SHA256_CTX oracle;
-  sha256_Init(&oracle);
-  sha256_Update(&oracle, (const uint8_t *)"Let the generator generation begin!",
-                36);
-
-  secp256k1_gej *G_raw = get_generator_G();
-  secp256k1_gej *J_raw = get_generator_J();
-  secp256k1_gej *H_raw = get_generator_H();
-
-  while (!create_pts(G_pts, G_raw, N_LEVELS, &oracle))
-    ;
-  while (!create_pts(J_pts, J_raw, N_LEVELS, &oracle))
-    ;
-  while (!create_pts(H_pts, H_raw, N_LEVELS, &oracle))
-    ;
 }
 
 void signature_get_challenge(const secp256k1_gej *pt, const uint8_t *msg32,

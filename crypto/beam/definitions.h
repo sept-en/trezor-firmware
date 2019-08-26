@@ -115,12 +115,6 @@ typedef struct {
 } packed_key_idv_t;
 #pragma pack(pop)
 
-secp256k1_gej *get_generator_lut_G(void);
-
-secp256k1_gej *get_generator_lut_J(void);
-
-secp256k1_gej *get_generator_lut_H(void);
-
 secp256k1_gej *get_generator_G(void);
 
 secp256k1_gej *get_generator_J(void);
