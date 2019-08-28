@@ -15,8 +15,8 @@ int test_tx_kernel(void) {
   HKdf_t kdf;
   HKdf_init(&kdf);
   // DEBUG_PRINT("KDF: ", kdf.generator_secret, DIGEST_LENGTH);
-  scalar_t peer_sk;
-  scalar_clear(&peer_sk);
+  secp256k1_scalar peer_sk;
+  secp256k1_scalar_clear(&peer_sk);
 
   // Test Add Input
   peer_add_input(&transaction.inputs, &peer_sk, 100, &kdf, NULL);
@@ -45,8 +45,8 @@ int test_tx_kernel(void) {
   secp256k1_gej xG;
   secp256k1_gej_set_infinity(&kG);
   secp256k1_gej_set_infinity(&xG);
-  scalar_t peer_nonce;
-  scalar_clear(&peer_nonce);
+  secp256k1_scalar peer_nonce;
+  secp256k1_scalar_clear(&peer_nonce);
   uint8_t kernel_hash_message[DIGEST_LENGTH];
 
   uint8_t preimage[DIGEST_LENGTH];

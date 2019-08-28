@@ -49,7 +49,7 @@ void phrase_to_seed(const char *phrase, uint8_t *out_seed32) {
 }
 
 void seed_to_kdf(const uint8_t *seed, size_t n, uint8_t *out_gen32,
-                 scalar_t *out_cof) {
+                 secp256k1_scalar *out_cof) {
   nonce_generator_t secret;
   nonce_generator_init(&secret, (const uint8_t *)"beam-HKdf", 10);
   nonce_generator_write(&secret, seed, n);
@@ -87,18 +87,18 @@ void kidv_set_subkey(key_idv_t *kidv, uint32_t sub_idx, uint32_t scheme) {
 }
 
 void derive_key(const uint8_t *parent, uint8_t parent_size,
-                const uint8_t *hash_id, uint8_t id_size, const scalar_t *cof_sk,
-                scalar_t *out_sk) {
-  scalar_t a_sk;
+                const uint8_t *hash_id, uint8_t id_size, const secp256k1_scalar *cof_sk,
+                secp256k1_scalar *out_sk) {
+  secp256k1_scalar a_sk;
   derive_pkey(parent, parent_size, hash_id, id_size, &a_sk);
 
-  scalar_clear(out_sk);
-  scalar_mul(out_sk, &a_sk, cof_sk);
+  secp256k1_scalar_clear(out_sk);
+  secp256k1_scalar_mul(out_sk, &a_sk, cof_sk);
 }
 
 void derive_pkey(const uint8_t *parent, uint8_t parent_size,
-                 const uint8_t *hash_id, uint8_t id_size, scalar_t *out_sk) {
-  scalar_clear(out_sk);
+                 const uint8_t *hash_id, uint8_t id_size, secp256k1_scalar *out_sk) {
+  secp256k1_scalar_clear(out_sk);
   nonce_generator_t key;
   nonce_generator_init(&key, (const uint8_t *)"beam-Key", 9);
   nonce_generator_write(&key, parent, parent_size);
@@ -106,7 +106,7 @@ void derive_pkey(const uint8_t *parent, uint8_t parent_size,
   nonce_generator_export_scalar(&key, NULL, 0, out_sk);
 }
 
-void sk_to_pk(scalar_t *sk, const secp256k1_gej *generator_pts,
+void sk_to_pk(secp256k1_scalar *sk, const secp256k1_gej *generator_pts,
               uint8_t *out32) {
   secp256k1_gej ptn;
   generator_mul_scalar(&ptn, generator_pts, sk);
@@ -114,19 +114,19 @@ void sk_to_pk(scalar_t *sk, const secp256k1_gej *generator_pts,
   point_t p;
   export_gej_to_point(&ptn, &p);
   if (p.y) {
-    scalar_negate(sk, sk);
+    secp256k1_scalar_negate(sk, sk);
   }
 
   memcpy(out32, p.x, 32);
 }
 
-void signature_sign(const uint8_t *msg32, const scalar_t *sk,
+void signature_sign(const uint8_t *msg32, const secp256k1_scalar *sk,
                     const secp256k1_gej *generator_pts,
                     ecc_signature_t *signature) {
   nonce_generator_t secret;
   uint8_t bytes[32];
 
-  scalar_get_b32(bytes, sk);
+  secp256k1_scalar_get_b32(bytes, sk);
 
   nonce_generator_init(&secret, (const uint8_t *)"beam-Schnorr", 13);
   nonce_generator_write(&secret, bytes, DIGEST_LENGTH);
@@ -143,7 +143,7 @@ void signature_sign(const uint8_t *msg32, const scalar_t *sk,
 #endif
   nonce_generator_write(&secret, bytes, DIGEST_LENGTH);
 
-  scalar_t multisig_nonce;
+  secp256k1_scalar multisig_nonce;
   nonce_generator_export_scalar(&secret, NULL, 0, &multisig_nonce);
   generator_mul_scalar(&signature->nonce_pub, generator_pts, &multisig_nonce);
 
@@ -154,7 +154,7 @@ void signature_sign(const uint8_t *msg32, const scalar_t *sk,
 int signature_is_valid(const uint8_t *msg32, const ecc_signature_t *signature,
                        const secp256k1_gej *pk,
                        const secp256k1_gej *generator_pts) {
-  scalar_t e;
+  secp256k1_scalar e;
   signature_get_challenge(&signature->nonce_pub, msg32, &e);
 
   secp256k1_gej pt;
@@ -168,28 +168,28 @@ int signature_is_valid(const uint8_t *msg32, const ecc_signature_t *signature,
   return secp256k1_gej_is_infinity(&pt) != 0;
 }
 
-void get_child_kdf(const uint8_t *parent_secret_32, const scalar_t *parent_cof,
+void get_child_kdf(const uint8_t *parent_secret_32, const secp256k1_scalar *parent_cof,
                    uint32_t index, uint8_t *out32_child_secret,
-                   scalar_t *out_child_cof) {
+                   secp256k1_scalar *out_child_cof) {
   if (!index) {
     // by convention 0 is not a child
     memcpy(out32_child_secret, parent_secret_32, 32);
-    memcpy(out_child_cof, parent_cof, sizeof(scalar_t));
+    memcpy(out_child_cof, parent_cof, sizeof(secp256k1_scalar));
     return;
   }
   uint8_t child_id[32];
-  scalar_t child_key;
+  secp256k1_scalar child_key;
   uint8_t child_scalar_data[32];
   generate_hash_id(index, CONTEXT.key.ChildKey, 0, child_id);
   derive_key(parent_secret_32, 32, child_id, 32, parent_cof, &child_key);
-  scalar_get_b32(child_scalar_data, &child_key);
+  secp256k1_scalar_get_b32(child_scalar_data, &child_key);
 
   seed_to_kdf(child_scalar_data, 32, out32_child_secret, out_child_cof);
 }
 
 void get_HKdf(uint32_t index, const uint8_t *seed, HKdf_t *hkdf) {
   uint8_t master_secret_key[DIGEST_LENGTH];
-  scalar_t master_cofactor;
+  secp256k1_scalar master_cofactor;
   seed_to_kdf(seed, DIGEST_LENGTH, master_secret_key, &master_cofactor);
 
   HKdf_init(hkdf);
@@ -197,10 +197,10 @@ void get_HKdf(uint32_t index, const uint8_t *seed, HKdf_t *hkdf) {
                 hkdf->generator_secret, &hkdf->cofactor);
 }
 
-uint8_t *get_owner_key(const uint8_t *master_key, const scalar_t *master_cof,
+uint8_t *get_owner_key(const uint8_t *master_key, const secp256k1_scalar *master_cof,
                        const uint8_t *secret, size_t secret_size) {
   uint8_t child_secret_key[32];
-  scalar_t child_cofactor;
+  secp256k1_scalar child_cofactor;
   get_child_kdf(master_key, master_cof, 0, child_secret_key, &child_cofactor);
 
   HKdf_pub_packed_t packed;
@@ -214,20 +214,20 @@ uint8_t *get_owner_key(const uint8_t *master_key, const scalar_t *master_cof,
 }
 
 void create_master_nonce(uint8_t *master, const uint8_t *seed32) {
-  scalar_t master_nonce;
+  secp256k1_scalar master_nonce;
   nonce_generator_t nonce;
 
   nonce_generator_init(&nonce, (const uint8_t *)"beam-master-nonce", 18);
   nonce_generator_write(&nonce, seed32, 32);
   nonce_generator_export_scalar(&nonce, NULL, 0, &master_nonce);
 
-  scalar_get_b32(master, &master_nonce);
+  secp256k1_scalar_get_b32(master, &master_nonce);
 }
 
 void create_derived_nonce(const uint8_t *master, uint8_t idx,
                           uint8_t *derived) {
   do {
-    scalar_t derived_nonce;
+    secp256k1_scalar derived_nonce;
     nonce_generator_t nonce;
 
     nonce_generator_init(&nonce, (const uint8_t *)"beam-derived-nonce", 19);
@@ -236,14 +236,14 @@ void create_derived_nonce(const uint8_t *master, uint8_t idx,
     nonce_generator_write(&nonce, &idx, sizeof(idx));
     nonce_generator_export_scalar(&nonce, NULL, 0, &derived_nonce);
 
-    scalar_get_b32(derived, &derived_nonce);
+    secp256k1_scalar_get_b32(derived, &derived_nonce);
   } while (!is_scalar_valid(derived));
 }
 
 void get_nonce_public_key(const uint8_t *nonce, point_t *pub) {
-  scalar_t sk;
+  secp256k1_scalar sk;
   secp256k1_gej ptn;
-  scalar_set_b32(&sk, nonce, NULL);
+  secp256k1_scalar_set_b32(&sk, nonce, NULL);
   generator_mul_scalar(&ptn, get_context()->generator.G_pts, &sk);
 
   export_gej_to_point(&ptn, pub);

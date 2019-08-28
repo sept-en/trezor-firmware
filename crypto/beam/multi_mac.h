@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
   secp256k1_gej pt[MULTI_MAC_CASUAL_COUNT];
-  scalar_t k;
+  secp256k1_scalar k;
   uint32_t prepared;
   _multi_mac_fast_aux_t aux;
 } multi_mac_casual_t;
@@ -32,7 +32,7 @@ typedef struct {
   uint32_t n_casual;
 
   multi_mac_prepared_t **prepared;
-  scalar_t *k_prepared;
+  secp256k1_scalar *k_prepared;
   _multi_mac_fast_aux_t *aux_prepared;
   uint32_t n_prepared;
 } multi_mac_t;
@@ -48,9 +48,9 @@ void multi_mac_casual_init_new(multi_mac_casual_t *casual,
                                const secp256k1_gej *p);
 
 void multi_mac_casual_init(multi_mac_casual_t *casual, const secp256k1_gej *p,
-                           const scalar_t *k);
+                           const secp256k1_scalar *k);
 
-void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux, const scalar_t *k,
+void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux, const secp256k1_scalar *k,
                                  unsigned int iBitsRemaining,
                                  unsigned int nMaxOdd, unsigned int *pTbl,
                                  unsigned int iThisEntry);

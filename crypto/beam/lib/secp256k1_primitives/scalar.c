@@ -5,8 +5,7 @@
  * file COPYING or http://www.opensource.org/licenses/mit-license.php.*
  **********************************************************************/
 
-#include "scalar32.h"
-#include <assert.h>
+#include "scalar.h"
 
 /* Limbs of the secp256k1 order. */
 #define SECP256K1_N_0 ((uint32_t)0xD0364141UL)
@@ -35,7 +34,7 @@
 #define SECP256K1_N_H_6 ((uint32_t)0xFFFFFFFFUL)
 #define SECP256K1_N_H_7 ((uint32_t)0x7FFFFFFFUL)
 
-void scalar_clear(scalar_t *r) {
+void secp256k1_scalar_clear(secp256k1_scalar *r) {
   r->d[0] = 0;
   r->d[1] = 0;
   r->d[2] = 0;
@@ -46,7 +45,7 @@ void scalar_clear(scalar_t *r) {
   r->d[7] = 0;
 }
 
-void scalar_set_int(scalar_t *r, unsigned int v) {
+void secp256k1_scalar_set_int(secp256k1_scalar *r, unsigned int v) {
   r->d[0] = v;
   r->d[1] = 0;
   r->d[2] = 0;
@@ -57,7 +56,7 @@ void scalar_set_int(scalar_t *r, unsigned int v) {
   r->d[7] = 0;
 }
 
-void scalar_set_u64(scalar_t *r, uint64_t v) {
+void secp256k1_scalar_set_u64(secp256k1_scalar *r, uint64_t v) {
   r->d[0] = v;
   r->d[1] = v >> 32;
   r->d[2] = 0;
@@ -68,27 +67,23 @@ void scalar_set_u64(scalar_t *r, uint64_t v) {
   r->d[7] = 0;
 }
 
-unsigned int scalar_get_bits(const scalar_t *a, unsigned int offset,
+unsigned int secp256k1_scalar_get_bits(const secp256k1_scalar *a, unsigned int offset,
                              unsigned int count) {
-  assert((offset + count - 1) >> 5 == offset >> 5);
   return (a->d[offset >> 5] >> (offset & 0x1F)) & ((1 << count) - 1);
 }
 
-unsigned int scalar_get_bits_var(const scalar_t *a, unsigned int offset,
+unsigned int secp256k1_scalar_get_bits_var(const secp256k1_scalar *a, unsigned int offset,
                                  unsigned int count) {
-  assert(count < 32);
-  assert(offset + count <= 256);
   if ((offset + count - 1) >> 5 == offset >> 5) {
-    return scalar_get_bits(a, offset, count);
+    return secp256k1_scalar_get_bits(a, offset, count);
   } else {
-    assert((offset >> 5) + 1 < 8);
     return ((a->d[offset >> 5] >> (offset & 0x1F)) |
             (a->d[(offset >> 5) + 1] << (32 - (offset & 0x1F)))) &
            ((((uint32_t)1) << count) - 1);
   }
 }
 
-int scalar_check_overflow(const scalar_t *a) {
+int secp256k1_scalar_check_overflow(const secp256k1_scalar *a) {
   int yes = 0;
   int no = 0;
   no |= (a->d[7] < SECP256K1_N_7); /* No need for a > check. */
@@ -106,9 +101,8 @@ int scalar_check_overflow(const scalar_t *a) {
   return yes;
 }
 
-int scalar_reduce(scalar_t *r, uint32_t overflow) {
+int secp256k1_scalar_reduce(secp256k1_scalar *r, uint32_t overflow) {
   uint64_t t;
-  assert(overflow <= 1);
   t = (uint64_t)r->d[0] + overflow * SECP256K1_N_C_0;
   r->d[0] = t & 0xFFFFFFFFUL;
   t >>= 32;
@@ -135,7 +129,7 @@ int scalar_reduce(scalar_t *r, uint32_t overflow) {
   return overflow;
 }
 
-int scalar_add(scalar_t *r, const scalar_t *a, const scalar_t *b) {
+int secp256k1_scalar_add(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b) {
   int overflow;
   uint64_t t = (uint64_t)a->d[0] + b->d[0];
   r->d[0] = t & 0xFFFFFFFFULL;
@@ -161,15 +155,13 @@ int scalar_add(scalar_t *r, const scalar_t *a, const scalar_t *b) {
   t += (uint64_t)a->d[7] + b->d[7];
   r->d[7] = t & 0xFFFFFFFFULL;
   t >>= 32;
-  overflow = t + scalar_check_overflow(r);
-  assert(overflow == 0 || overflow == 1);
-  scalar_reduce(r, overflow);
+  overflow = t + secp256k1_scalar_check_overflow(r);
+  secp256k1_scalar_reduce(r, overflow);
   return overflow;
 }
 
-void scalar_cadd_bit(scalar_t *r, unsigned int bit, int flag) {
+void secp256k1_scalar_cadd_bit(secp256k1_scalar *r, unsigned int bit, int flag) {
   uint64_t t;
-  assert(bit < 256);
   bit += ((uint32_t)flag - 1) &
          0x100; /* forcing (bit >> 5) > 7 makes this a noop */
   t = (uint64_t)r->d[0] + (((uint32_t)((bit >> 5) == 0)) << (bit & 0x1F));
@@ -195,13 +187,9 @@ void scalar_cadd_bit(scalar_t *r, unsigned int bit, int flag) {
   t >>= 32;
   t += (uint64_t)r->d[7] + (((uint32_t)((bit >> 5) == 7)) << (bit & 0x1F));
   r->d[7] = t & 0xFFFFFFFFULL;
-#ifdef VERIFY
-  assert((t >> 32) == 0);
-  assert(scalar_check_overflow(r) == 0);
-#endif
 }
 
-void scalar_set_b32(scalar_t *r, const unsigned char *b32, int *overflow) {
+void secp256k1_scalar_set_b32(secp256k1_scalar *r, const unsigned char *b32, int *overflow) {
   int over;
   r->d[0] = (uint32_t)b32[31] | (uint32_t)b32[30] << 8 |
             (uint32_t)b32[29] << 16 | (uint32_t)b32[28] << 24;
@@ -219,13 +207,13 @@ void scalar_set_b32(scalar_t *r, const unsigned char *b32, int *overflow) {
             (uint32_t)b32[4] << 24;
   r->d[7] = (uint32_t)b32[3] | (uint32_t)b32[2] << 8 | (uint32_t)b32[1] << 16 |
             (uint32_t)b32[0] << 24;
-  over = scalar_reduce(r, scalar_check_overflow(r));
+  over = secp256k1_scalar_reduce(r, secp256k1_scalar_check_overflow(r));
   if (overflow) {
     *overflow = over;
   }
 }
 
-void scalar_get_b32(unsigned char *bin, const scalar_t *a) {
+void secp256k1_scalar_get_b32(unsigned char *bin, const secp256k1_scalar *a) {
   bin[0] = a->d[7] >> 24;
   bin[1] = a->d[7] >> 16;
   bin[2] = a->d[7] >> 8;
@@ -260,13 +248,13 @@ void scalar_get_b32(unsigned char *bin, const scalar_t *a) {
   bin[31] = a->d[0];
 }
 
-int scalar_is_zero(const scalar_t *a) {
+int secp256k1_scalar_is_zero(const secp256k1_scalar *a) {
   return (a->d[0] | a->d[1] | a->d[2] | a->d[3] | a->d[4] | a->d[5] | a->d[6] |
           a->d[7]) == 0;
 }
 
-void scalar_negate(scalar_t *r, const scalar_t *a) {
-  uint32_t nonzero = 0xFFFFFFFFUL * (scalar_is_zero(a) == 0);
+void secp256k1_scalar_negate(secp256k1_scalar *r, const secp256k1_scalar *a) {
+  uint32_t nonzero = 0xFFFFFFFFUL * (secp256k1_scalar_is_zero(a) == 0);
   uint64_t t = (uint64_t)(~a->d[0]) + SECP256K1_N_0 + 1;
   r->d[0] = t & nonzero;
   t >>= 32;
@@ -292,12 +280,12 @@ void scalar_negate(scalar_t *r, const scalar_t *a) {
   r->d[7] = t & nonzero;
 }
 
-int scalar_is_one(const scalar_t *a) {
+int secp256k1_scalar_is_one(const secp256k1_scalar *a) {
   return ((a->d[0] ^ 1) | a->d[1] | a->d[2] | a->d[3] | a->d[4] | a->d[5] |
           a->d[6] | a->d[7]) == 0;
 }
 
-int scalar_is_high(const scalar_t *a) {
+int secp256k1_scalar_is_high(const secp256k1_scalar *a) {
   int yes = 0;
   int no = 0;
   no |= (a->d[7] < SECP256K1_N_H_7);
@@ -315,12 +303,12 @@ int scalar_is_high(const scalar_t *a) {
   return yes;
 }
 
-int scalar_cond_negate(scalar_t *r, int flag) {
+int secp256k1_scalar_cond_negate(secp256k1_scalar *r, int flag) {
   /* If we are flag = 0, mask = 00...00 and this is a no-op;
-   * if we are flag = 1, mask = 11...11 and this is identical to scalar_negate
+   * if we are flag = 1, mask = 11...11 and this is identical to secp256k1_scalar_negate
    */
   uint32_t mask = !flag - 1;
-  uint32_t nonzero = 0xFFFFFFFFUL * (scalar_is_zero(r) == 0);
+  uint32_t nonzero = 0xFFFFFFFFUL * (secp256k1_scalar_is_zero(r) == 0);
   uint64_t t = (uint64_t)(r->d[0] ^ mask) + ((SECP256K1_N_0 + 1) & mask);
   r->d[0] = t & nonzero;
   t >>= 32;
@@ -365,7 +353,6 @@ int scalar_cond_negate(scalar_t *r, int flag) {
         (c1 < th)                                                              \
             ? 1                                                                \
             : 0; /* never overflows by contract (verified in the next line) */ \
-    assert((c1 >= th) || (c2 != 0));                                           \
   }
 
 /** Add a*b to the number defined by (c0,c1). c1 must never overflow. */
@@ -380,7 +367,6 @@ int scalar_cond_negate(scalar_t *r, int flag) {
     c0 += tl;                /* overflow is handled on the next line */     \
     th += (c0 < tl) ? 1 : 0; /* at most 0xFFFFFFFF */                       \
     c1 += th; /* never overflows by contract (verified in the next line) */ \
-    assert(c1 >= th);                                                       \
   }
 
 /** Add 2*a*b to the number defined by (c0,c1,c2). c2 must never overflow. */
@@ -396,7 +382,6 @@ int scalar_cond_negate(scalar_t *r, int flag) {
     c2 += (th2 < th)                                                           \
               ? 1                                                              \
               : 0; /* never overflows by contract (verified the next line) */  \
-    assert((th2 >= th) || (c2 != 0));                                          \
     tl2 = tl + tl; /* at most 0xFFFFFFFE (in case the lowest 63 bits of tl     \
                       were 0x7FFFFFFF) */                                      \
     th2 += (tl2 < tl) ? 1 : 0; /* at most 0xFFFFFFFF */                        \
@@ -406,12 +391,10 @@ int scalar_cond_negate(scalar_t *r, int flag) {
     c2 +=                                                                      \
         (c0 < tl2) &                                                           \
         (th2 == 0); /* never overflows by contract (verified the next line) */ \
-    assert((c0 >= tl2) || (th2 != 0) || (c2 != 0));                            \
     c1 += th2; /* overflow is handled on the next line */                      \
     c2 += (c1 < th2)                                                           \
               ? 1                                                              \
               : 0; /* never overflows by contract (verified the next line) */  \
-    assert((c1 >= th2) || (c2 != 0));                                          \
   }
 
 /** Add a to the number defined by (c0,c1,c2). c2 must never overflow. */
@@ -432,8 +415,6 @@ int scalar_cond_negate(scalar_t *r, int flag) {
     c1 += (c0 < (a))                                                          \
               ? 1                                                             \
               : 0; /* never overflows by contract (verified the next line) */ \
-    assert((c1 != 0) | (c0 >= (a)));                                          \
-    assert(c2 == 0);                                                          \
   }
 
 /** Extract the lowest 32 bits of (c0,c1,c2) into n, and left shift the number
@@ -453,10 +434,9 @@ int scalar_cond_negate(scalar_t *r, int flag) {
     (n) = c0;           \
     c0 = c1;            \
     c1 = 0;             \
-    assert(c2 == 0);    \
   }
 
-void scalar_reduce_512(scalar_t *r, const uint32_t *l) {
+void secp256k1_scalar_reduce_512(secp256k1_scalar *r, const uint32_t *l) {
   uint64_t c;
   uint32_t n0 = l[8], n1 = l[9], n2 = l[10], n3 = l[11], n4 = l[12], n5 = l[13],
            n6 = l[14], n7 = l[15];
@@ -530,7 +510,6 @@ void scalar_reduce_512(scalar_t *r, const uint32_t *l) {
   extract(m10);
   sumadd_fast(n7);
   extract_fast(m11);
-  assert(c0 <= 1);
   m12 = c0;
 
   /* Reduce 385 bits into 258. */
@@ -578,7 +557,6 @@ void scalar_reduce_512(scalar_t *r, const uint32_t *l) {
   sumadd_fast(m11);
   extract_fast(p7);
   p8 = c0 + m12;
-  assert(p8 <= 2);
 
   /* Reduce 258 bits into 256. */
   /* r[0..7] = p[0..7] + p[8] * SECP256K1_N_C. */
@@ -608,10 +586,10 @@ void scalar_reduce_512(scalar_t *r, const uint32_t *l) {
   c >>= 32;
 
   /* Final reduction of r. */
-  scalar_reduce(r, c + scalar_check_overflow(r));
+  secp256k1_scalar_reduce(r, c + secp256k1_scalar_check_overflow(r));
 }
 
-void scalar_mul_512(uint32_t *l, const scalar_t *a, const scalar_t *b) {
+void secp256k1_scalar_mul_512(uint32_t *l, const secp256k1_scalar *a, const secp256k1_scalar *b) {
   /* 96 bit accumulator. */
   uint32_t c0 = 0, c1 = 0, c2 = 0;
 
@@ -695,11 +673,10 @@ void scalar_mul_512(uint32_t *l, const scalar_t *a, const scalar_t *b) {
   extract(l[13]);
   muladd_fast(a->d[7], b->d[7]);
   extract_fast(l[14]);
-  assert(c1 == 0);
   l[15] = c0;
 }
 
-void scalar_sqr_512(uint32_t *l, const scalar_t *a) {
+void secp256k1_scalar_sqr_512(uint32_t *l, const secp256k1_scalar *a) {
   /* 96 bit accumulator. */
   uint32_t c0 = 0, c1 = 0, c2 = 0;
 
@@ -755,7 +732,6 @@ void scalar_sqr_512(uint32_t *l, const scalar_t *a) {
   extract(l[13]);
   muladd_fast(a->d[7], a->d[7]);
   extract_fast(l[14]);
-  assert(c1 == 0);
   l[15] = c0;
 }
 
@@ -767,16 +743,14 @@ void scalar_sqr_512(uint32_t *l, const scalar_t *a) {
 #undef extract
 #undef extract_fast
 
-void scalar_mul(scalar_t *r, const scalar_t *a, const scalar_t *b) {
+void secp256k1_scalar_mul(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b) {
   uint32_t l[16];
-  scalar_mul_512(l, a, b);
-  scalar_reduce_512(r, l);
+  secp256k1_scalar_mul_512(l, a, b);
+  secp256k1_scalar_reduce_512(r, l);
 }
 
-int scalar_shr_int(scalar_t *r, int n) {
+int secp256k1_scalar_shr_int(secp256k1_scalar *r, int n) {
   int ret;
-  assert(n > 0);
-  assert(n < 16);
   ret = r->d[0] & ((1 << n) - 1);
   r->d[0] = (r->d[0] >> n) + (r->d[1] << (32 - n));
   r->d[1] = (r->d[1] >> n) + (r->d[2] << (32 - n));
@@ -789,26 +763,25 @@ int scalar_shr_int(scalar_t *r, int n) {
   return ret;
 }
 
-void scalar_sqr(scalar_t *r, const scalar_t *a) {
+void secp256k1_scalar_sqr(secp256k1_scalar *r, const secp256k1_scalar *a) {
   uint32_t l[16];
-  scalar_sqr_512(l, a);
-  scalar_reduce_512(r, l);
+  secp256k1_scalar_sqr_512(l, a);
+  secp256k1_scalar_reduce_512(r, l);
 }
 
-int scalar_eq(const scalar_t *a, const scalar_t *b) {
+int secp256k1_scalar_eq(const secp256k1_scalar *a, const secp256k1_scalar *b) {
   return ((a->d[0] ^ b->d[0]) | (a->d[1] ^ b->d[1]) | (a->d[2] ^ b->d[2]) |
           (a->d[3] ^ b->d[3]) | (a->d[4] ^ b->d[4]) | (a->d[5] ^ b->d[5]) |
           (a->d[6] ^ b->d[6]) | (a->d[7] ^ b->d[7])) == 0;
 }
 
-void scalar_mul_shift_var(scalar_t *r, const scalar_t *a, const scalar_t *b,
+void secp256k1_scalar_mul_shift_var(secp256k1_scalar *r, const secp256k1_scalar *a, const secp256k1_scalar *b,
                           unsigned int shift) {
   uint32_t l[16];
   unsigned int shiftlimbs;
   unsigned int shiftlow;
   unsigned int shifthigh;
-  assert(shift >= 256);
-  scalar_mul_512(l, a, b);
+  secp256k1_scalar_mul_512(l, a, b);
   shiftlimbs = shift >> 5;
   shiftlow = shift & 0x1F;
   shifthigh = 32 - shiftlow;
@@ -848,196 +821,196 @@ void scalar_mul_shift_var(scalar_t *r, const scalar_t *a, const scalar_t *b,
              (shift < 288 && shiftlow ? (l[7 + shiftlimbs] << shifthigh) : 0))
           : 0;
   r->d[7] = shift < 288 ? (l[7 + shiftlimbs] >> shiftlow) : 0;
-  scalar_cadd_bit(r, 0, (l[(shift - 1) >> 5] >> ((shift - 1) & 0x1f)) & 1);
+  secp256k1_scalar_cadd_bit(r, 0, (l[(shift - 1) >> 5] >> ((shift - 1) & 0x1f)) & 1);
 }
 
-void scalar_inverse(scalar_t *r, const scalar_t *x) {
-  scalar_t *t;
+void secp256k1_scalar_inverse(secp256k1_scalar *r, const secp256k1_scalar *x) {
+  secp256k1_scalar *t;
   int i;
   /* First compute x ^ (2^N - 1) for some values of N. */
-  scalar_t x2, x3, x4, x6, x7, x8, x15, x30, x60, x120, x127;
+  secp256k1_scalar x2, x3, x4, x6, x7, x8, x15, x30, x60, x120, x127;
 
-  scalar_sqr(&x2, x);
-  scalar_mul(&x2, &x2, x);
+  secp256k1_scalar_sqr(&x2, x);
+  secp256k1_scalar_mul(&x2, &x2, x);
 
-  scalar_sqr(&x3, &x2);
-  scalar_mul(&x3, &x3, x);
+  secp256k1_scalar_sqr(&x3, &x2);
+  secp256k1_scalar_mul(&x3, &x3, x);
 
-  scalar_sqr(&x4, &x3);
-  scalar_mul(&x4, &x4, x);
+  secp256k1_scalar_sqr(&x4, &x3);
+  secp256k1_scalar_mul(&x4, &x4, x);
 
-  scalar_sqr(&x6, &x4);
-  scalar_sqr(&x6, &x6);
-  scalar_mul(&x6, &x6, &x2);
+  secp256k1_scalar_sqr(&x6, &x4);
+  secp256k1_scalar_sqr(&x6, &x6);
+  secp256k1_scalar_mul(&x6, &x6, &x2);
 
-  scalar_sqr(&x7, &x6);
-  scalar_mul(&x7, &x7, x);
+  secp256k1_scalar_sqr(&x7, &x6);
+  secp256k1_scalar_mul(&x7, &x7, x);
 
-  scalar_sqr(&x8, &x7);
-  scalar_mul(&x8, &x8, x);
+  secp256k1_scalar_sqr(&x8, &x7);
+  secp256k1_scalar_mul(&x8, &x8, x);
 
-  scalar_sqr(&x15, &x8);
+  secp256k1_scalar_sqr(&x15, &x8);
   for (i = 0; i < 6; i++) {
-    scalar_sqr(&x15, &x15);
+    secp256k1_scalar_sqr(&x15, &x15);
   }
-  scalar_mul(&x15, &x15, &x7);
+  secp256k1_scalar_mul(&x15, &x15, &x7);
 
-  scalar_sqr(&x30, &x15);
+  secp256k1_scalar_sqr(&x30, &x15);
   for (i = 0; i < 14; i++) {
-    scalar_sqr(&x30, &x30);
+    secp256k1_scalar_sqr(&x30, &x30);
   }
-  scalar_mul(&x30, &x30, &x15);
+  secp256k1_scalar_mul(&x30, &x30, &x15);
 
-  scalar_sqr(&x60, &x30);
+  secp256k1_scalar_sqr(&x60, &x30);
   for (i = 0; i < 29; i++) {
-    scalar_sqr(&x60, &x60);
+    secp256k1_scalar_sqr(&x60, &x60);
   }
-  scalar_mul(&x60, &x60, &x30);
+  secp256k1_scalar_mul(&x60, &x60, &x30);
 
-  scalar_sqr(&x120, &x60);
+  secp256k1_scalar_sqr(&x120, &x60);
   for (i = 0; i < 59; i++) {
-    scalar_sqr(&x120, &x120);
+    secp256k1_scalar_sqr(&x120, &x120);
   }
-  scalar_mul(&x120, &x120, &x60);
+  secp256k1_scalar_mul(&x120, &x120, &x60);
 
-  scalar_sqr(&x127, &x120);
+  secp256k1_scalar_sqr(&x127, &x120);
   for (i = 0; i < 6; i++) {
-    scalar_sqr(&x127, &x127);
+    secp256k1_scalar_sqr(&x127, &x127);
   }
-  scalar_mul(&x127, &x127, &x7);
+  secp256k1_scalar_mul(&x127, &x127, &x7);
 
   /* Then accumulate the final result (t starts at x127). */
   t = &x127;
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 4; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 4; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 3; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 4; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 5; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 4; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 5; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x4);    /* 1111 */
+  secp256k1_scalar_mul(t, t, &x4);    /* 1111 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 3; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 4; i++) { /* 000 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);       /* 1 */
+  secp256k1_scalar_mul(t, t, x);       /* 1 */
   for (i = 0; i < 10; i++) { /* 0000000 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 4; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x3);    /* 111 */
+  secp256k1_scalar_mul(t, t, &x3);    /* 111 */
   for (i = 0; i < 9; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x8);    /* 11111111 */
+  secp256k1_scalar_mul(t, t, &x8);    /* 11111111 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 3; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 3; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 5; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x4);    /* 1111 */
+  secp256k1_scalar_mul(t, t, &x4);    /* 1111 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 5; i++) { /* 000 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 4; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 2; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 8; i++) { /* 000000 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 3; i++) { /* 0 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, &x2);    /* 11 */
+  secp256k1_scalar_mul(t, t, &x2);    /* 11 */
   for (i = 0; i < 3; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 6; i++) { /* 00000 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(t, t, x);      /* 1 */
+  secp256k1_scalar_mul(t, t, x);      /* 1 */
   for (i = 0; i < 8; i++) { /* 00 */
-    scalar_sqr(t, t);
+    secp256k1_scalar_sqr(t, t);
   }
-  scalar_mul(r, t, &x6); /* 111111 */
+  secp256k1_scalar_mul(r, t, &x6); /* 111111 */
 }

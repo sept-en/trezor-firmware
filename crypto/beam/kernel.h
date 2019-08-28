@@ -53,7 +53,7 @@ typedef struct {
 typedef vec_t(tx_output_t*) tx_outputs_vec_t;
 
 typedef struct {
-  scalar_t offset;
+  secp256k1_scalar offset;
   tx_inputs_vec_t inputs;
   tx_outputs_vec_t outputs;
   tx_kernels_vec_t kernels;
@@ -73,7 +73,7 @@ typedef struct {
   uint32_t nonce_slot;
 
   // Additional explicit blinding factor that should be added
-  scalar_t offset;
+  secp256k1_scalar offset;
 } transaction_data_t;
 
 uint8_t is_valid_nonce_slot(uint32_t nonce_slot);
@@ -83,22 +83,22 @@ void create_kidv_image(const HKdf_t* kdf, const key_idv_t* key_idv,
                        secp256k1_gej* out_commitment, uint8_t create_coin_key);
 void switch_commitment(const uint8_t* asset_id, secp256k1_gej* h_gen);
 void switch_commitment_get_hash(const key_idv_t* kidv, uint8_t* hash_id);
-void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
+void switch_commitment_create(secp256k1_scalar* sk, secp256k1_gej* commitment,
                               const HKdf_t* kdf, const key_idv_t* kidv,
                               uint8_t has_commitment,
                               const secp256k1_gej* h_gen);
 void switch_commitment_get_sk1(const secp256k1_gej* commitment,
                                const secp256k1_gej* sk0_j,
-                               scalar_t* scalar_out);
-void peer_finalize_excess(scalar_t* peer_scalar, secp256k1_gej* kG,
-                          scalar_t* k_offset);
-void peer_add_input(tx_inputs_vec_t* tx_inputs, scalar_t* peer_scalar,
+                               secp256k1_scalar* scalar_out);
+void peer_finalize_excess(secp256k1_scalar* peer_scalar, secp256k1_gej* kG,
+                          secp256k1_scalar* k_offset);
+void peer_add_input(tx_inputs_vec_t* tx_inputs, secp256k1_scalar* peer_scalar,
                     uint64_t val, HKdf_t* kdf, const uint8_t* asset_id);
-void peer_add_output(tx_outputs_vec_t* tx_outputs, scalar_t* peer_scalar,
+void peer_add_output(tx_outputs_vec_t* tx_outputs, secp256k1_scalar* peer_scalar,
                      uint64_t val, HKdf_t* kdf, const uint8_t* asset_id);
 void tx_output_get_seed_kid(const tx_output_t* output, uint8_t* seed,
                             HKdf_t* kdf);
-void tx_output_create(tx_output_t* output, scalar_t* sk, HKdf_t* coin_kdf,
+void tx_output_create(tx_output_t* output, secp256k1_scalar* sk, HKdf_t* coin_kdf,
                       const key_idv_t* kidv, HKdf_t* tag_kdf,
                       uint8_t is_public);
 void create_tx_kernel(tx_kernels_vec_t* trg_kernels,
@@ -110,22 +110,22 @@ int kernel_traverse(const tx_kernel_t* kernel, const tx_kernel_t* parent_kernel,
 void kernel_get_hash(const tx_kernel_t* kernel,
                      const uint8_t* hash_lock_preimage, uint8_t* out);
 void cosign_kernel_part_1(tx_kernel_t* kernel, secp256k1_gej* kG,
-                          secp256k1_gej* xG, scalar_t* peer_scalars,
-                          scalar_t* peer_nonces, size_t num_peers,
-                          scalar_t* transaction_offset,
+                          secp256k1_gej* xG, secp256k1_scalar* peer_scalars,
+                          secp256k1_scalar* peer_nonces, size_t num_peers,
+                          secp256k1_scalar* transaction_offset,
                           uint8_t* kernel_hash_message,
                           const uint8_t* hash_lock_preimage);
 void cosign_kernel_part_2(tx_kernel_t* kernel, secp256k1_gej* xG,
-                          scalar_t* peer_scalars, scalar_t* peer_nonces,
+                          secp256k1_scalar* peer_scalars, secp256k1_scalar* peer_nonces,
                           size_t num_peers, uint8_t* kernel_hash_message);
-uint8_t sign_transaction_part_1(int64_t* value_transferred, scalar_t* sk_total,
+uint8_t sign_transaction_part_1(int64_t* value_transferred, secp256k1_scalar* sk_total,
                                 const kidv_vec_t* inputs,
                                 const kidv_vec_t* outputs,
                                 const transaction_data_t* tx_data,
                                 const HKdf_t* kdf);
-uint8_t sign_transaction_part_2(scalar_t* res,
+uint8_t sign_transaction_part_2(secp256k1_scalar* res,
                                 const transaction_data_t* tx_data,
-                                const scalar_t* nonce,
-                                const scalar_t* sk_total);
+                                const secp256k1_scalar* nonce,
+                                const secp256k1_scalar* sk_total);
 
 #endif  // __BEAM_KERNEL__

@@ -1,8 +1,8 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#include "lib/group.h"
-#include "lib/scalar32.h"
+#include "lib/secp256k1_primitives/group.h"
+#include "lib/secp256k1_primitives/scalar.h"
 #include "lib/vec.h"
 
 #define DIGEST_LENGTH 32
@@ -70,7 +70,7 @@ typedef struct {
 } context_t;
 
 typedef struct {
-  scalar_t cofactor;
+  secp256k1_scalar cofactor;
   // according to rfc5869
   uint8_t generator_secret[DIGEST_LENGTH];
 } HKdf_t;
@@ -85,7 +85,7 @@ typedef struct {
 
 typedef struct {
   secp256k1_gej nonce_pub;
-  scalar_t k;
+  secp256k1_scalar k;
 } ecc_signature_t;
 
 typedef struct {

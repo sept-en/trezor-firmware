@@ -70,7 +70,7 @@ SRCS  += rfc6979.c
 SRCS  += slip39.c
 SRCS  += beam/rangeproof.c beam/oracle.c beam/inner_product.c beam/multi_mac.c beam/nonce_generator.c  beam/internal.c beam/functions.c
 SRCS  += beam/definitions.c beam/definitions_ipp.c
-SRCS  += beam/lib/scalar32.c beam/lib/field_impl.c beam/lib/field_10x26_impl.c beam/lib/group_impl.c beam/lib/util.c beam/lib/vec.c
+SRCS  += beam/lib/secp256k1_primitives/scalar.c beam/lib/secp256k1_primitives/field.c beam/lib/secp256k1_primitives/group.c beam/lib/secp256k1_primitives/util.c beam/lib/vec.c
 SRCS  += beam/kernel.c beam/misc.c
 
 OBJS   = $(SRCS:.c=.o)

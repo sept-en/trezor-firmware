@@ -353,8 +353,8 @@ const uint8_t const_lut_pb[] = {
     0x5a, 0xb3, 0xd8, 0xda, 0x59, 0x58, 0xd4, 0xb1,
 };
 
-scalar_t *get_pa(void) { return (scalar_t *)const_lut_pa; }
+secp256k1_scalar *get_pa(void) { return (secp256k1_scalar *)const_lut_pa; }
 
-scalar_t *get_pb(void) { return (scalar_t *)const_lut_pb; }
+secp256k1_scalar *get_pb(void) { return (secp256k1_scalar *)const_lut_pb; }
 
-scalar_t *get_pwr_mul(void) { return (scalar_t *)const_pwr_mul; }
+secp256k1_scalar *get_pwr_mul(void) { return (secp256k1_scalar *)const_pwr_mul; }

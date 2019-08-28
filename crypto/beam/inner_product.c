@@ -4,16 +4,16 @@ void inner_product_modifier_init(inner_product_modifier_t *mod) {
   memset(mod->multiplier, 0, sizeof(mod->multiplier));
 }
 
-void inner_product_get_dot(scalar_t *out, const scalar_t *a,
-                           const scalar_t *b) {
+void inner_product_get_dot(secp256k1_scalar *out, const secp256k1_scalar *a,
+                           const secp256k1_scalar *b) {
   *out = a[0];
-  scalar_mul(out, out, &b[0]);
+  secp256k1_scalar_mul(out, out, &b[0]);
 
-  scalar_t tmp;
+  secp256k1_scalar tmp;
   for (size_t i = 1; i < INNER_PRODUCT_N_DIM; i++) {
     tmp = a[i];
-    scalar_mul(&tmp, &tmp, &b[i]);
-    scalar_add(out, out, &tmp);
+    secp256k1_scalar_mul(&tmp, &tmp, &b[i]);
+    secp256k1_scalar_add(out, out, &tmp);
   }
 }
 
@@ -37,29 +37,29 @@ void calculator_modifier_expanded_init(_calculator_modifier_expanded_t *mod_ex,
   for (size_t j = 0; j < count; j++) {
     mod_ex->use[j] = (NULL != mod->multiplier[j]);
     if (mod_ex->use[j]) {
-      scalar_set_int(&mod_ex->pwr[j][0], 1U);
+      secp256k1_scalar_set_int(&mod_ex->pwr[j][0], 1U);
       for (size_t i = 1; i < INNER_PRODUCT_N_DIM; i++)
-        scalar_mul(&mod_ex->pwr[j][i], &mod_ex->pwr[j][i - 1],
+        secp256k1_scalar_mul(&mod_ex->pwr[j][i], &mod_ex->pwr[j][i - 1],
                    mod->multiplier[j]);
     }
   }
 }
 
 void calculator_modifier_expanded_set(
-    const _calculator_modifier_expanded_t *mod_ex, scalar_t *dst,
-    const scalar_t *src, int i, int j) {
+    const _calculator_modifier_expanded_t *mod_ex, secp256k1_scalar *dst,
+    const secp256k1_scalar *src, int i, int j) {
   if (mod_ex->use[j])
-    scalar_mul(dst, src, &mod_ex->pwr[j][i]);
+    secp256k1_scalar_mul(dst, src, &mod_ex->pwr[j][i]);
   else
     *dst = *src;
 }
 
 void calculator_aggregator_proceed_rec(_calculator_aggregator_t *ag,
                                        uint32_t i_pos, uint32_t i_cycle,
-                                       const scalar_t *k, uint32_t j) {
+                                       const secp256k1_scalar *k, uint32_t j) {
   if (ag->x[j]) {
-    scalar_t k0 = *k;
-    scalar_mul(&k0, &k0, &ag->x[j]->val[INNER_PRODUCT_N_CYCLES - i_cycle]);
+    secp256k1_scalar k0 = *k;
+    secp256k1_scalar_mul(&k0, &k0, &ag->x[j]->val[INNER_PRODUCT_N_CYCLES - i_cycle]);
 
     calculator_aggregator_proceed(ag, i_pos, i_cycle - 1, &k0);
   } else
@@ -69,7 +69,7 @@ void calculator_aggregator_proceed_rec(_calculator_aggregator_t *ag,
 }
 
 void calculator_aggregator_proceed(_calculator_aggregator_t *ag, uint32_t i_pos,
-                                   uint32_t i_cycle, const scalar_t *k) {
+                                   uint32_t i_cycle, const secp256k1_scalar *k) {
   if (i_cycle != ag->i_cycle_trg) {
     calculator_aggregator_proceed_rec(ag, i_pos, i_cycle, k, !ag->j);
     uint32_t n_step = 1 << (i_cycle - 1);
@@ -93,21 +93,21 @@ void inner_product_calculator_extract_LR(inner_product_calculator_t *calc,
   multi_mac_reset(&calc->mm);
 
   // Cross-term
-  scalar_t *cross_trm = &calc->mm.k_prepared[calc->mm.n_prepared];
+  secp256k1_scalar *cross_trm = &calc->mm.k_prepared[calc->mm.n_prepared];
   calc->mm.prepared[calc->mm.n_prepared++] =
       (multi_mac_prepared_t *)get_generator_dot_ipp();
 
-  scalar_clear(cross_trm);
+  secp256k1_scalar_clear(cross_trm);
 
   for (uint32_t i = 0; i < calc->n; i++) {
-    const scalar_t *a = &calc->src[j][i];
-    const scalar_t *b = &calc->src[!j][calc->n + i];
-    scalar_t r;
-    scalar_mul(&r, a, b);
-    scalar_add(cross_trm, cross_trm, &r);
+    const secp256k1_scalar *a = &calc->src[j][i];
+    const secp256k1_scalar *b = &calc->src[!j][calc->n + i];
+    secp256k1_scalar r;
+    secp256k1_scalar_mul(&r, a, b);
+    secp256k1_scalar_add(cross_trm, cross_trm, &r);
   }
 
-  scalar_mul(cross_trm, cross_trm, &calc->cs.dot_multiplier);
+  secp256k1_scalar_mul(cross_trm, cross_trm, &calc->cs.dot_multiplier);
 
   // other
   for (int jSrc = 0; jSrc < 2; jSrc++) {
@@ -115,7 +115,7 @@ void inner_product_calculator_extract_LR(inner_product_calculator_t *calc,
     uint32_t off1 = (jSrc == j) ? calc->n : 0;
 
     for (uint32_t i = 0; i < calc->n; i++) {
-      const scalar_t *v = &calc->src[jSrc][i + off0];
+      const secp256k1_scalar *v = &calc->src[jSrc][i + off0];
 
       _calculator_aggregator_t aggr;
       calculator_aggregator_init(&aggr, &calc->mm, &calc->cs.x[0],
@@ -134,12 +134,12 @@ void inner_product_calculator_condense(inner_product_calculator_t *calc) {
   for (int j = 0; j < 2; j++)
     for (uint32_t i = 0; i < calc->n; i++) {
       // dst and src need not to be distinct
-      scalar_t r;
-      scalar_mul(&calc->val[j][i], &calc->src[j][i],
+      secp256k1_scalar r;
+      secp256k1_scalar_mul(&calc->val[j][i], &calc->src[j][i],
                  &calc->cs.x[j].val[calc->i_cycle]);
-      scalar_mul(&r, &calc->src[j][calc->n + i],
+      secp256k1_scalar_mul(&r, &calc->src[j][calc->n + i],
                  &calc->cs.x[!j].val[calc->i_cycle]);
-      scalar_add(&calc->val[j][i], &calc->val[j][i], &r);
+      secp256k1_scalar_add(&calc->val[j][i], &calc->val[j][i], &r);
     }
 
   // Points
@@ -166,8 +166,8 @@ void inner_product_calculator_condense(inner_product_calculator_t *calc) {
 
       if (calc->i_cycle > INNER_PRODUCT_I_CYCLE_0) aggr.calc = calc;
 
-      scalar_t k;
-      scalar_set_int(&k, 1U);
+      secp256k1_scalar k;
+      secp256k1_scalar_set_int(&k, 1U);
       calculator_aggregator_proceed(&aggr, i, calc->gen_order, &k);
       multi_mac_calculate(&calc->mm, g0);
     }
@@ -176,8 +176,8 @@ void inner_product_calculator_condense(inner_product_calculator_t *calc) {
 }
 
 void inner_product_create(inner_product_t *in, SHA256_CTX *oracle,
-                          secp256k1_gej *ab, const scalar_t *dot_ab,
-                          const scalar_t *a, const scalar_t *b,
+                          secp256k1_gej *ab, const secp256k1_scalar *dot_ab,
+                          const secp256k1_scalar *a, const secp256k1_scalar *b,
                           inner_product_modifier_t *mod) {
   inner_product_calculator_t calc;
   calculator_modifier_expanded_init(&calc.mod, mod);
@@ -210,7 +210,7 @@ void inner_product_create(inner_product_t *in, SHA256_CTX *oracle,
     calc.n = INNER_PRODUCT_N_DIM >> (calc.i_cycle + 1);
 
     scalar_create_nnz(oracle, &calc.cs.x[0].val[calc.i_cycle]);
-    scalar_inverse(&calc.cs.x[1].val[calc.i_cycle],
+    secp256k1_scalar_inverse(&calc.cs.x[1].val[calc.i_cycle],
                    &calc.cs.x[0].val[calc.i_cycle]);
 
     for (int j = 0; j < 2; j++) {

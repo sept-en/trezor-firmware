@@ -192,7 +192,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_transaction_maker_sign_transaction_part_1(
 
   int64_t value_transferred = 0;
 
-  scalar_t sk_total;
+  secp256k1_scalar sk_total;
   init_context();
   sign_transaction_part_1(&value_transferred, &sk_total, &o->inputs,
                           &o->outputs, &o->tx_data, &kdf);
@@ -201,7 +201,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_transaction_maker_sign_transaction_part_1(
   mp_buffer_info_t sk_buf;
   mp_get_buffer_raise(out_sk_total, &sk_buf, MP_BUFFER_RW);
 
-  scalar_get_b32((uint8_t*)sk_buf.buf, &sk_total);
+  secp256k1_scalar_get_b32((uint8_t*)sk_buf.buf, &sk_total);
 
   return mp_obj_new_int(value_transferred);
 }
@@ -218,17 +218,17 @@ STATIC mp_obj_t mod_trezorcrypto_beam_transaction_maker_sign_transaction_part_2(
   mp_buffer_info_t sk_total_buf;
   mp_get_buffer_raise(args[1], &sk_total_buf, MP_BUFFER_READ);
 
-  scalar_t sk_total;
+  secp256k1_scalar sk_total;
   scalar_import_nnz(&sk_total, (const uint8_t*)sk_total_buf.buf);
 
   mp_buffer_info_t nonce_buf;
   mp_get_buffer_raise(args[2], &nonce_buf, MP_BUFFER_READ);
 
-  scalar_t nonce;
+  secp256k1_scalar nonce;
   scalar_import_nnz(&nonce, (const uint8_t*)nonce_buf.buf);
 
-  scalar_t res_sk;
-  scalar_clear(&res_sk);
+  secp256k1_scalar res_sk;
+  secp256k1_scalar_clear(&res_sk);
 
   init_context();
   sign_transaction_part_2(&res_sk, &o->tx_data, &nonce, &sk_total);
@@ -237,7 +237,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_transaction_maker_sign_transaction_part_2(
   mp_buffer_info_t out_res;
   mp_get_buffer_raise(args[3], &out_res, MP_BUFFER_RW);
 
-  scalar_get_b32((uint8_t*)out_res.buf, &res_sk);
+  secp256k1_scalar_get_b32((uint8_t*)out_res.buf, &res_sk);
 
   return mp_obj_new_int(1);
 }
@@ -422,13 +422,13 @@ STATIC mp_obj_t mod_trezorcrypto_beam_seed_to_kdf(size_t n_args,
   mp_buffer_info_t out_cofactor;
   mp_get_buffer_raise(args[3], &out_cofactor, MP_BUFFER_RW);
 
-  scalar_t cofactor;
+  secp256k1_scalar cofactor;
   // void seed_to_kdf(const uint8_t *seed, size_t seed_size, uint8_t *out_gen32,
-  // scalar_t *out_cof);
+  // secp256k1_scalar *out_cof);
   seed_to_kdf((const uint8_t*)seed.buf, seed_size, (uint8_t*)out_gen32.buf,
               &cofactor);
   // Write data into out_cofactor raw pointer instead of scalar type
-  scalar_get_b32((uint8_t*)out_cofactor.buf, &cofactor);
+  secp256k1_scalar_get_b32((uint8_t*)out_cofactor.buf, &cofactor);
 
   return mp_const_none;
 }
@@ -451,18 +451,18 @@ STATIC mp_obj_t mod_trezorcrypto_beam_derive_child_key(size_t n_args,
 
   mp_buffer_info_t cofactor_sk;
   mp_get_buffer_raise(args[4], &cofactor_sk, MP_BUFFER_READ);
-  scalar_t cof_sk;
+  secp256k1_scalar cof_sk;
   scalar_import_nnz(&cof_sk, (const uint8_t*)cofactor_sk.buf);
 
   mp_buffer_info_t out_res_sk;
   mp_get_buffer_raise(args[5], &out_res_sk, MP_BUFFER_RW);
 
-  scalar_t res_sk;
+  secp256k1_scalar res_sk;
   derive_key((const uint8_t*)parent.buf, parent_size,
              (const uint8_t*)hash_id.buf, hash_id_size, &cof_sk, &res_sk);
 
   // Write data into out_cofactor raw pointer instead of scalar type
-  scalar_get_b32((uint8_t*)out_res_sk.buf, &res_sk);
+  secp256k1_scalar_get_b32((uint8_t*)out_res_sk.buf, &res_sk);
 
   // DEBUG_PRINT("Got res: ", (uint8_t*)out_res_sk.buf, 32)
 
@@ -477,7 +477,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_secret_key_to_public_key(
     mp_obj_t secret_key, mp_obj_t public_key_x, mp_obj_t public_key_y) {
   mp_buffer_info_t sk;
   mp_get_buffer_raise(secret_key, &sk, MP_BUFFER_READ);
-  scalar_t scalar_sk;
+  secp256k1_scalar scalar_sk;
   scalar_import_nnz(&scalar_sk, (const uint8_t*)sk.buf);
 
   mp_buffer_info_t pk_x;
@@ -505,7 +505,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_signature_sign(size_t n_args,
 
   mp_buffer_info_t sk;
   mp_get_buffer_raise(args[1], &sk, MP_BUFFER_READ);
-  scalar_t scalar_sk;
+  secp256k1_scalar scalar_sk;
   scalar_import_nnz(&scalar_sk, (const uint8_t*)sk.buf);
 
   // in type of point_t_x (uint8_t[32])
@@ -525,7 +525,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_signature_sign(size_t n_args,
                  get_context()->generator.G_pts, &signature);
   // Export scalar
   // Write data into raw pointer instead of scalar type
-  scalar_get_b32((uint8_t*)out_k.buf, &signature.k);
+  secp256k1_scalar_get_b32((uint8_t*)out_k.buf, &signature.k);
   gej_to_xy_bufs(&signature.nonce_pub, (uint8_t*)out_nonce_pub_x.buf,
                  (uint8_t*)out_nonce_pub_y.buf);
 
@@ -598,7 +598,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_export_owner_key(size_t n_args,
   mp_buffer_info_t out_owner_key;
   mp_get_buffer_raise(args[4], &out_owner_key, MP_BUFFER_RW);
 
-  scalar_t cofactor_scalar;
+  secp256k1_scalar cofactor_scalar;
   scalar_import_nnz(&cofactor_scalar, (const uint8_t*)master_cofactor.buf);
 
   init_context();

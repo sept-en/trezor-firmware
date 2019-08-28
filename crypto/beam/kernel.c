@@ -8,7 +8,7 @@
 // sk0_J is a result of multiplication of derived key and generator J
 void switch_commitment_get_sk1(const secp256k1_gej* commitment,
                                const secp256k1_gej* sk0_j,
-                               scalar_t* scalar_out) {
+                               secp256k1_scalar* scalar_out) {
   SHA256_CTX x;
   sha256_Init(&x);
 
@@ -57,7 +57,7 @@ void create_common_kidv_image(const HKdf_t* kdf, const key_idv_t* kidv,
   uint8_t hash_id[DIGEST_LENGTH];
   generate_hash_id(kidv->id.idx, kidv->id.type, kidv->id.sub_idx, hash_id);
 
-  scalar_t sk;
+  secp256k1_scalar sk;
   derive_key(kdf->generator_secret, DIGEST_LENGTH, hash_id, DIGEST_LENGTH,
              &kdf->cofactor, &sk);
 
@@ -68,7 +68,7 @@ void create_common_kidv_image(const HKdf_t* kdf, const key_idv_t* kidv,
 void create_kidv_image(const HKdf_t* kdf, const key_idv_t* kidv,
                        secp256k1_gej* out_commitment, uint8_t create_coin_key) {
   if (create_coin_key) {
-    scalar_t sk;
+    secp256k1_scalar sk;
     // As we would have no asset id, we should have infinitiy (or NULL) h_gen
     switch_commitment_create(&sk, out_commitment, kdf, kidv, 1, NULL);
   } else {
@@ -102,7 +102,7 @@ void switch_commitment_get_hash(const key_idv_t* kidv, uint8_t* hash_id) {
   }
 }
 
-void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
+void switch_commitment_create(secp256k1_scalar* sk, secp256k1_gej* commitment,
                               const HKdf_t* kdf, const key_idv_t* kidv,
                               uint8_t has_commitment,
                               const secp256k1_gej* h_gen) {
@@ -120,9 +120,9 @@ void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
   secp256k1_gej key_j_mul_result;
   generator_mul_scalar(&key_j_mul_result, get_context()->generator.J_pts, sk);
 
-  scalar_t sk1;
+  secp256k1_scalar sk1;
   switch_commitment_get_sk1(commitment, &key_j_mul_result, &sk1);
-  scalar_add(sk, sk, &sk1);
+ secp256k1_scalar_add(sk, sk, &sk1);
 
   if (has_commitment) {
     secp256k1_gej sk1_g_mul_result;
@@ -132,9 +132,9 @@ void switch_commitment_create(scalar_t* sk, secp256k1_gej* commitment,
   }
 }
 
-void peer_finalize_excess(scalar_t* peer_scalar, secp256k1_gej* kG,
-                          scalar_t* k_offset) {
-  scalar_add(k_offset, k_offset, peer_scalar);
+void peer_finalize_excess(secp256k1_scalar* peer_scalar, secp256k1_gej* kG,
+                          secp256k1_scalar* k_offset) {
+ secp256k1_scalar_add(k_offset, k_offset, peer_scalar);
 
   uint8_t random_scalar_data[DIGEST_LENGTH];
 #ifdef BEAM_DEBUG
@@ -142,10 +142,10 @@ void peer_finalize_excess(scalar_t* peer_scalar, secp256k1_gej* kG,
 #else
   random_buffer(random_scalar_data, DIGEST_LENGTH);
 #endif
-  scalar_set_b32(peer_scalar, random_scalar_data, NULL);
-  scalar_add(k_offset, k_offset, peer_scalar);
+ secp256k1_scalar_set_b32(peer_scalar, random_scalar_data, NULL);
+ secp256k1_scalar_add(k_offset, k_offset, peer_scalar);
 
-  scalar_negate(peer_scalar, peer_scalar);
+ secp256k1_scalar_negate(peer_scalar, peer_scalar);
 
   secp256k1_gej peer_scalar_mul_g;
   generator_mul_scalar(&peer_scalar_mul_g, get_context()->generator.G_pts,
@@ -153,7 +153,7 @@ void peer_finalize_excess(scalar_t* peer_scalar, secp256k1_gej* kG,
   secp256k1_gej_add_var(kG, kG, &peer_scalar_mul_g, NULL);
 }
 
-void peer_add_input(tx_inputs_vec_t* tx_inputs, scalar_t* peer_scalar,
+void peer_add_input(tx_inputs_vec_t* tx_inputs, secp256k1_scalar* peer_scalar,
                     uint64_t val, HKdf_t* kdf, const uint8_t* asset_id) {
   tx_input_t* input = malloc(sizeof(tx_input_t));
   tx_input_init(input);
@@ -162,7 +162,7 @@ void peer_add_input(tx_inputs_vec_t* tx_inputs, scalar_t* peer_scalar,
   key_idv_init(&kidv);
   kidv.value = val;
 
-  scalar_t k;
+  secp256k1_scalar k;
   secp256k1_gej h_gen;
   switch_commitment(asset_id, &h_gen);
   secp256k1_gej commitment_native;
@@ -174,10 +174,10 @@ void peer_add_input(tx_inputs_vec_t* tx_inputs, scalar_t* peer_scalar,
   // Push TxInput to vec of inputs
   vec_push(tx_inputs, input);
 
-  scalar_add(peer_scalar, peer_scalar, &k);
+ secp256k1_scalar_add(peer_scalar, peer_scalar, &k);
 }
 
-void tx_output_create(tx_output_t* output, scalar_t* sk, HKdf_t* coin_kdf,
+void tx_output_create(tx_output_t* output, secp256k1_scalar* sk, HKdf_t* coin_kdf,
                       const key_idv_t* kidv, HKdf_t* tag_kdf,
                       uint8_t is_public) {
   secp256k1_gej h_gen;
@@ -214,7 +214,7 @@ void tx_output_get_seed_kid(const tx_output_t* output, uint8_t* seed,
   get_seed_kid_from_commitment(&output->tx_element.commitment, seed, kdf);
 }
 
-void peer_add_output(tx_outputs_vec_t* tx_outputs, scalar_t* peer_scalar,
+void peer_add_output(tx_outputs_vec_t* tx_outputs, secp256k1_scalar* peer_scalar,
                      uint64_t val, HKdf_t* kdf, const uint8_t* asset_id) {
   tx_output_t* output = malloc(sizeof(tx_output_t));
   tx_output_init(output);
@@ -227,7 +227,7 @@ void peer_add_output(tx_outputs_vec_t* tx_outputs, scalar_t* peer_scalar,
       (asset_id == NULL) || memis0(asset_id, DIGEST_LENGTH);
   if (!is_empty_asset_id) memcpy(output->asset_id, asset_id, DIGEST_LENGTH);
 
-  scalar_t k;
+  secp256k1_scalar k;
   const int is_public = 0;
   tx_output_create(output, &k, kdf, &kidv, kdf, is_public);
 
@@ -240,8 +240,8 @@ void peer_add_output(tx_outputs_vec_t* tx_outputs, scalar_t* peer_scalar,
   // Push TxOutput to vec of outputs
   vec_push(tx_outputs, output);
 
-  scalar_negate(&k, &k);
-  scalar_add(peer_scalar, peer_scalar, &k);
+ secp256k1_scalar_negate(&k, &k);
+ secp256k1_scalar_add(peer_scalar, peer_scalar, &k);
 }
 
 // AmountBig::Type is 128 bits = 16 bytes
@@ -351,9 +351,9 @@ void kernel_get_hash(const tx_kernel_t* kernel,
 
 // 1st pass. Public excesses and Nonces are summed.
 void cosign_kernel_part_1(tx_kernel_t* kernel, secp256k1_gej* kG,
-                          secp256k1_gej* xG, scalar_t* peer_scalars,
-                          scalar_t* peer_nonces, size_t num_peers,
-                          scalar_t* transaction_offset,
+                          secp256k1_gej* xG, secp256k1_scalar* peer_scalars,
+                          secp256k1_scalar* peer_nonces, size_t num_peers,
+                          secp256k1_scalar* transaction_offset,
                           uint8_t* kernel_hash_message,
                           const uint8_t* hash_lock_preimage) {
   for (size_t i = 0; i < num_peers; ++i) {
@@ -366,7 +366,7 @@ void cosign_kernel_part_1(tx_kernel_t* kernel, secp256k1_gej* kG,
 #else
     random_buffer(random_scalar_data, DIGEST_LENGTH);
 #endif
-    scalar_set_b32(&peer_nonces[i], random_scalar_data, NULL);
+   secp256k1_scalar_set_b32(&peer_nonces[i], random_scalar_data, NULL);
     secp256k1_gej nonce_mul_g;
     generator_mul_scalar(&nonce_mul_g, get_context()->generator.G_pts,
                          &peer_nonces[i]);
@@ -389,23 +389,23 @@ void cosign_kernel_part_1(tx_kernel_t* kernel, secp256k1_gej* kG,
 
 // 2nd pass. Signing. Total excess is the signature public key.
 void cosign_kernel_part_2(tx_kernel_t* kernel, secp256k1_gej* xG,
-                          scalar_t* peer_scalars, scalar_t* peer_nonces,
+                          secp256k1_scalar* peer_scalars, secp256k1_scalar* peer_nonces,
                           size_t num_peers, uint8_t* kernel_hash_message) {
-  scalar_t k_sig;
-  scalar_set_int(&k_sig, 0);
+  secp256k1_scalar k_sig;
+ secp256k1_scalar_set_int(&k_sig, 0);
 
   for (size_t i = 0; i < num_peers; ++i) {
     ecc_signature_t sig;
     sig.nonce_pub = *xG;
 
-    scalar_t multisig_nonce = peer_nonces[i];
+    secp256k1_scalar multisig_nonce = peer_nonces[i];
 
-    scalar_t k;
+    secp256k1_scalar k;
     signature_sign_partial(&multisig_nonce, &sig.nonce_pub, kernel_hash_message,
                            &peer_scalars[i], &k);
-    scalar_add(&k_sig, &k_sig, &k);
+   secp256k1_scalar_add(&k_sig, &k_sig, &k);
     // Signed, prepare for next tx
-    scalar_set_int(&peer_scalars[i], 0);
+   secp256k1_scalar_set_int(&peer_scalars[i], 0);
   }
 
   kernel->kernel.signature.nonce_pub = *xG;
@@ -437,7 +437,7 @@ void create_tx_kernel(tx_kernels_vec_t* trg_kernels,
   if (should_emit_custom_tag) {
     uint8_t sk_asset_data[DIGEST_LENGTH];
     random_buffer(sk_asset_data, DIGEST_LENGTH);
-    scalar_t sk_asset;
+    secp256k1_scalar sk_asset;
     scalar_import_nnz(&sk_asset, sk_asset_data);
 
     uint8_t aid[DIGEST_LENGTH];
@@ -466,7 +466,7 @@ void create_tx_kernel(tx_kernels_vec_t* trg_kernels,
                         &kernel_emission->kernel.tx_element.commitment);
 
     vec_push(trg_kernels, kernel_emission);
-    scalar_negate(&sk_asset, &sk_asset);
+   secp256k1_scalar_negate(&sk_asset, &sk_asset);
 
     // m_pPeers[0].m_k += skAsset;
   }
@@ -494,35 +494,35 @@ void create_tx_kernel(tx_kernels_vec_t* trg_kernels,
 }
 
 // Add the blinding factor and value of a specific TXO
-void summarize_once(scalar_t* res, int64_t* d_val_out, const key_idv_t* kidv,
+void summarize_once(secp256k1_scalar* res, int64_t* d_val_out, const key_idv_t* kidv,
                     const HKdf_t* kdf) {
   int64_t d_val = *d_val_out;
 
-  scalar_t sk;
+  secp256k1_scalar sk;
   secp256k1_gej commitment_native;
   switch_commitment_create(&sk, &commitment_native, kdf, kidv, 1, NULL);
   // Write results - commitment_native - to TxOutput
   // export_gej_to_point(&commitment_native, &output->tx_element.commitment);
 
-  scalar_add(res, res, &sk);
+ secp256k1_scalar_add(res, res, &sk);
   d_val += kidv->value;
 
   *d_val_out = d_val;
 }
 
 // Summarize. Summarizes blinding factors and values of several in/out TXOs
-void summarize_bf_and_values(scalar_t* res, int64_t* d_val_out,
+void summarize_bf_and_values(secp256k1_scalar* res, int64_t* d_val_out,
                              const kidv_vec_t* inputs,
                              const kidv_vec_t* outputs, const HKdf_t* kdf) {
   int64_t d_val = *d_val_out;
 
-  scalar_negate(res, res);
+ secp256k1_scalar_negate(res, res);
   d_val = -d_val;
 
   for (uint32_t i = 0; i < (uint32_t)outputs->length; ++i)
     summarize_once(res, &d_val, &outputs->data[i], kdf);
 
-  scalar_negate(res, res);
+ secp256k1_scalar_negate(res, res);
   d_val = -d_val;
 
   for (uint32_t i = 0; i < (uint32_t)inputs->length; ++i)
@@ -533,8 +533,8 @@ void summarize_bf_and_values(scalar_t* res, int64_t* d_val_out,
 
 void summarize_commitment(secp256k1_gej* res, const kidv_vec_t* inputs,
                           const kidv_vec_t* outputs, const HKdf_t* kdf) {
-  scalar_t sk;
-  scalar_clear(&sk);
+  secp256k1_scalar sk;
+ secp256k1_scalar_clear(&sk);
   int64_t d_val = 0;
   summarize_bf_and_values(&sk, &d_val, inputs, outputs, kdf);
 
@@ -544,9 +544,9 @@ void summarize_commitment(secp256k1_gej* res, const kidv_vec_t* inputs,
     secp256k1_gej_neg(res, res);
 
     // res += Context::get().H * Amount(-dVal);
-    scalar_t sk1;
-    scalar_set_u64(&sk1, (uint64_t)d_val * -1);
-    scalar_negate(&sk1, &sk1);
+    secp256k1_scalar sk1;
+   secp256k1_scalar_set_u64(&sk1, (uint64_t)d_val * -1);
+   secp256k1_scalar_negate(&sk1, &sk1);
     secp256k1_gej sk1_h_mul_result;
     generator_mul_scalar(&sk1_h_mul_result, get_context()->generator.H_pts,
                          &sk1);
@@ -555,8 +555,8 @@ void summarize_commitment(secp256k1_gej* res, const kidv_vec_t* inputs,
     secp256k1_gej_neg(res, res);
   } else {
     // res += Context::get().H * Amount(dVal);
-    scalar_t sk1;
-    scalar_set_u64(&sk1, (uint64_t)d_val);
+    secp256k1_scalar sk1;
+   secp256k1_scalar_set_u64(&sk1, (uint64_t)d_val);
     secp256k1_gej sk1_h_mul_result;
     generator_mul_scalar(&sk1_h_mul_result, get_context()->generator.H_pts,
                          &sk1);
@@ -572,16 +572,16 @@ uint8_t is_valid_nonce_slot(uint32_t nonce_slot) {
   return 1;
 }
 
-uint8_t sign_transaction_part_1(int64_t* value_transferred, scalar_t* sk_total,
+uint8_t sign_transaction_part_1(int64_t* value_transferred, secp256k1_scalar* sk_total,
                                 const kidv_vec_t* inputs,
                                 const kidv_vec_t* outputs,
                                 const transaction_data_t* tx_data,
                                 const HKdf_t* kdf) {
   if (!is_valid_nonce_slot(tx_data->nonce_slot)) return 0;
 
-  scalar_t offset;
-  scalar_negate(&offset, &tx_data->offset);
-  memcpy(sk_total, &offset, sizeof(scalar_t));
+  secp256k1_scalar offset;
+ secp256k1_scalar_negate(&offset, &tx_data->offset);
+  memcpy(sk_total, &offset, sizeof(secp256k1_scalar));
   int64_t d_val = 0;
 
   // calculate the overall blinding factor, and the sum being sent/transferred
@@ -592,10 +592,10 @@ uint8_t sign_transaction_part_1(int64_t* value_transferred, scalar_t* sk_total,
   return 1;
 }
 
-uint8_t sign_transaction_part_2(scalar_t* res,
+uint8_t sign_transaction_part_2(secp256k1_scalar* res,
                                 const transaction_data_t* tx_data,
-                                const scalar_t* nonce,
-                                const scalar_t* sk_total) {
+                                const secp256k1_scalar* nonce,
+                                const secp256k1_scalar* sk_total) {
   if (!is_valid_nonce_slot(tx_data->nonce_slot)) return 0;
 
   // Calculate the Kernel ID
@@ -613,7 +613,7 @@ uint8_t sign_transaction_part_2(scalar_t* res,
   kernel_get_hash(&krn, NULL, kernel_hash_value);
 
   uint8_t sk_data[DIGEST_LENGTH];
-  scalar_get_b32(sk_data, sk_total);
+ secp256k1_scalar_get_b32(sk_data, sk_total);
 
 #ifdef BEAM_TREZOR_DEBUG
   DEBUG_PRINT("Sk total: ", sk_data, DIGEST_LENGTH);

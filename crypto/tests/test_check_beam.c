@@ -85,9 +85,9 @@ int IS_EQUAL_HEX(const char *hex_str, const uint8_t *bytes, size_t str_size) {
 }
 
 void verify_scalar_data(const char *msg, const char *hex_data,
-                        const scalar_t *sk) {
+                        const secp256k1_scalar *sk) {
   uint8_t sk_data[DIGEST_LENGTH];
-  scalar_get_b32(sk_data, sk);
+  secp256k1_scalar_get_b32(sk_data, sk);
   DEBUG_PRINT(msg, sk_data, DIGEST_LENGTH);
   VERIFY_TEST_EQUAL(IS_EQUAL_HEX(hex_data, sk_data, DIGEST_LENGTH), msg,
                     hex_data, "sk");
@@ -104,8 +104,8 @@ int test_tx_kernel(void) {
   HKdf_t kdf;
   // get_HKdf(0, seed, &kdf);
   HKdf_init(&kdf);
-  scalar_t peer_sk;
-  scalar_clear(&peer_sk);
+  secp256k1_scalar peer_sk;
+  secp256k1_scalar_clear(&peer_sk);
 
   // Test Add Input
   peer_add_input(&transaction.inputs, &peer_sk, 100, &kdf, NULL);
@@ -164,8 +164,8 @@ int test_tx_kernel(void) {
   secp256k1_gej xG;
   secp256k1_gej_set_infinity(&kG);
   secp256k1_gej_set_infinity(&xG);
-  scalar_t peer_nonce;
-  scalar_clear(&peer_nonce);
+  secp256k1_scalar peer_nonce;
+  secp256k1_scalar_clear(&peer_nonce);
   uint8_t kernel_hash_message[DIGEST_LENGTH];
 
   uint8_t preimage[DIGEST_LENGTH];
@@ -263,8 +263,8 @@ void test_range_proof_confidential(void) {
   crp.kidv.id.type = 11;
   crp.kidv.id.sub_idx = 111;
 
-  scalar_t sk;
-  scalar_set_b32(&sk, sk_bytes, NULL);
+  secp256k1_scalar sk;
+  secp256k1_scalar_set_b32(&sk, sk_bytes, NULL);
   rangeproof_confidential_t rp;
   SHA256_CTX oracle;
   sha256_Init(&oracle);
@@ -310,8 +310,8 @@ void test_range_proof_public(void) {
   crp.kidv.id.type = 11;
   crp.kidv.id.sub_idx = 111;
 
-  scalar_t sk;
-  scalar_set_b32(&sk, sk_bytes, NULL);
+  secp256k1_scalar sk;
+  secp256k1_scalar_set_b32(&sk, sk_bytes, NULL);
   rangeproof_public_t rp;
   SHA256_CTX oracle;
   sha256_Init(&oracle);
@@ -341,14 +341,14 @@ void test_range_proof_public(void) {
 }
 
 void test_inner_product(void) {
-  scalar_t dot;
-  scalar_t *pA = get_pa();
-  scalar_t *pB = get_pb();
+  secp256k1_scalar dot;
+  secp256k1_scalar *pA = get_pa();
+  secp256k1_scalar *pB = get_pb();
   inner_product_get_dot(&dot, pA, pB);
 
-  uint8_t dot_bytes[sizeof(scalar_t)];
-  memcpy(dot_bytes, &dot, sizeof(scalar_t));
-  DEBUG_PRINT("inner_product dot", dot_bytes, sizeof(scalar_t));
+  uint8_t dot_bytes[sizeof(secp256k1_scalar)];
+  memcpy(dot_bytes, &dot, sizeof(secp256k1_scalar));
+  DEBUG_PRINT("inner_product dot", dot_bytes, sizeof(secp256k1_scalar));
   VERIFY_TEST(IS_EQUAL_HEX(
       "6ff4ce5bb57f2907012b1eaf5b4b3f6ffc5a38bc0506ee25edfe621312c237de",
       dot_bytes, 64));
@@ -395,10 +395,10 @@ void test_common(void) {
       64));
 
   uint8_t secret_key[DIGEST_LENGTH];
-  scalar_t cofactor;
+  secp256k1_scalar cofactor;
   uint8_t cofactor_data[DIGEST_LENGTH];
   seed_to_kdf(seed, DIGEST_LENGTH, secret_key, &cofactor);
-  scalar_get_b32(cofactor_data, &cofactor);
+  secp256k1_scalar_get_b32(cofactor_data, &cofactor);
   DEBUG_PRINT("seed_to_kdf (gen / secret_key): ", secret_key, DIGEST_LENGTH);
   VERIFY_TEST(IS_EQUAL_HEX(
       "d497d3d7dc9819a80e9035dd99d0877ebd61fd4cc7c19ee9a796c0aea6d04faf",
@@ -415,10 +415,10 @@ void test_common(void) {
       "8d3a2b7de4c7757cdd8591a06db8c2d85dfec748ec598baaa5dc1ede8d171fd2", id,
       64));
 
-  scalar_t key;
+  secp256k1_scalar key;
   uint8_t key_data[DIGEST_LENGTH];
   derive_key(secret_key, DIGEST_LENGTH, id, DIGEST_LENGTH, &cofactor, &key);
-  scalar_get_b32(key_data, &key);
+  secp256k1_scalar_get_b32(key_data, &key);
   DEBUG_PRINT("derive_key (res): ", key_data, DIGEST_LENGTH);
   VERIFY_TEST(IS_EQUAL_HEX(
       "1569368acd9ae88d2dd008643753312034c39c20d77ea27a5ac5091e9541d782",
@@ -439,7 +439,7 @@ void test_common(void) {
   uint8_t k_data[DIGEST_LENGTH];
   ecc_signature_t signature;
   signature_sign(msg, &key, get_context()->generator.G_pts, &signature);
-  scalar_get_b32(k_data, &signature.k);
+  secp256k1_scalar_get_b32(k_data, &signature.k);
   export_gej_to_point(&signature.nonce_pub, &nonce_point);
   DEBUG_PRINT("signature_sign k: ", k_data, DIGEST_LENGTH);
   DEBUG_PRINT("signature_sign nonce_point.x: ", nonce_point.x, DIGEST_LENGTH);
@@ -508,20 +508,20 @@ void test_transaction_signature(void) {
 
   tx_data.nonce_slot = 6;
 
-  scalar_set_int(&tx_data.offset, 3);
+  secp256k1_scalar_set_int(&tx_data.offset, 3);
 
-  scalar_t sk_total;
-  scalar_clear(&sk_total);
+  secp256k1_scalar sk_total;
+  secp256k1_scalar_clear(&sk_total);
   int64_t value_transferred = 0;
 
   sign_transaction_part_1(&value_transferred, &sk_total, &inputs, &outputs,
                           &tx_data, &kdf);
 
-  scalar_t res_sk;
-  scalar_clear(&res_sk);
+  secp256k1_scalar res_sk;
+  secp256k1_scalar_clear(&res_sk);
 
-  scalar_t nonce;
-  scalar_set_int(&nonce, 3);
+  secp256k1_scalar nonce;
+  secp256k1_scalar_set_int(&nonce, 3);
 
   sign_transaction_part_2(&res_sk, &tx_data, &nonce, &sk_total);
   verify_scalar_data(

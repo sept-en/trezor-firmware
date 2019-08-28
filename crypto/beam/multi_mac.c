@@ -13,7 +13,7 @@ void multi_mac_with_bufs_alloc(multi_mac_t *mm, int max_casual,
                                int max_prepared) {
   mm->casual = malloc(max_casual * sizeof(multi_mac_casual_t));
   mm->prepared = malloc(max_prepared * sizeof(multi_mac_prepared_t *));
-  mm->k_prepared = malloc(max_prepared * sizeof(scalar_t));
+  mm->k_prepared = malloc(max_prepared * sizeof(secp256k1_scalar));
   mm->aux_prepared = malloc(max_prepared * sizeof(_multi_mac_fast_aux_t));
 
   multi_mac_reset(mm);
@@ -35,12 +35,12 @@ void multi_mac_casual_init_new(multi_mac_casual_t *casual,
 }
 
 void multi_mac_casual_init(multi_mac_casual_t *casual, const secp256k1_gej *p,
-                           const scalar_t *k) {
+                           const secp256k1_scalar *k) {
   multi_mac_casual_init_new(casual, p);
   casual->k = *k;
 }
 
-void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux, const scalar_t *k,
+void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux, const secp256k1_scalar *k,
                                  unsigned int iBitsRemaining,
                                  unsigned int nMaxOdd, unsigned int *pTbl,
                                  unsigned int iThisEntry) {

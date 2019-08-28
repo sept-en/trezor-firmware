@@ -8,7 +8,7 @@ void sha256_oracle_update_gej(SHA256_CTX *oracle, const secp256k1_gej *gej);
 
 void sha256_oracle_update_pt(SHA256_CTX *oracle, const point_t *pt);
 
-void sha256_oracle_update_sk(SHA256_CTX *oracle, const scalar_t *sk);
+void sha256_oracle_update_sk(SHA256_CTX *oracle, const secp256k1_scalar *sk);
 
 void sha256_oracle_create(SHA256_CTX *oracle, uint8_t *out32);
 

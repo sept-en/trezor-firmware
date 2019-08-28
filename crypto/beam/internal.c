@@ -33,16 +33,16 @@ void sha256_write_64(SHA256_CTX *hash, uint64_t v) {
   sha256_write_8(hash, (uint8_t)v);
 }
 
-int scalar_import_nnz(scalar_t *scalar, const uint8_t *data32) {
+int scalar_import_nnz(secp256k1_scalar *scalar, const uint8_t *data32) {
   int overflow;
-  scalar_set_b32(scalar, data32, &overflow);
-  int zero = scalar_is_zero(scalar);
+ secp256k1_scalar_set_b32(scalar, data32, &overflow);
+  int zero =secp256k1_scalar_is_zero(scalar);
   return !(overflow || zero);
 }
 
-void scalar_create_nnz(SHA256_CTX *oracle, scalar_t *out_scalar) {
+void scalar_create_nnz(SHA256_CTX *oracle, secp256k1_scalar *out_scalar) {
   uint8_t data[32];
-  scalar_clear(out_scalar);
+ secp256k1_scalar_clear(out_scalar);
   do {
     SHA256_CTX new_oracle;
     memcpy(&new_oracle, oracle, sizeof(SHA256_CTX));
@@ -107,7 +107,7 @@ int export_gej_to_point(const secp256k1_gej *native_point, point_t *out_point) {
 }
 
 void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
-                          const scalar_t *sk) {
+                          const secp256k1_scalar *sk) {
 #ifndef BEAM_GENERATE_TABLES
   gej_mul_scalar(pPts, sk, res);
 #else
@@ -160,7 +160,7 @@ void generator_mul_scalar(secp256k1_gej *res, const secp256k1_gej *pPts,
 }
 
 void signature_get_challenge(const secp256k1_gej *pt, const uint8_t *msg32,
-                             scalar_t *out_scalar) {
+                             secp256k1_scalar *out_scalar) {
   point_t p;
   secp256k1_gej point;
   memcpy(&point, pt, sizeof(secp256k1_gej));
@@ -175,18 +175,18 @@ void signature_get_challenge(const secp256k1_gej *pt, const uint8_t *msg32,
   scalar_create_nnz(&oracle, out_scalar);
 }
 
-void signature_sign_partial(const scalar_t *multisig_nonce,
+void signature_sign_partial(const secp256k1_scalar *multisig_nonce,
                             const secp256k1_gej *multisig_nonce_pub,
-                            const uint8_t *msg, const scalar_t *sk,
-                            scalar_t *out_k) {
+                            const uint8_t *msg, const secp256k1_scalar *sk,
+                            secp256k1_scalar *out_k) {
   signature_get_challenge(multisig_nonce_pub, msg, out_k);
 
-  scalar_mul(out_k, out_k, sk);
-  scalar_add(out_k, out_k, multisig_nonce);
-  scalar_negate(out_k, out_k);
+ secp256k1_scalar_mul(out_k, out_k, sk);
+ secp256k1_scalar_add(out_k, out_k, multisig_nonce);
+ secp256k1_scalar_negate(out_k, out_k);
 }
 
-void gej_mul_scalar(const secp256k1_gej *pt, const scalar_t *sk,
+void gej_mul_scalar(const secp256k1_gej *pt, const secp256k1_scalar *sk,
                     secp256k1_gej *res) {
   multi_mac_casual_t mc;
   multi_mac_casual_init(&mc, pt, sk);
@@ -198,7 +198,7 @@ void gej_mul_scalar(const secp256k1_gej *pt, const scalar_t *sk,
   multi_mac_calculate(&mm, res);
 }
 
-void generate_HKdfPub(const uint8_t *secret_key, const scalar_t *cofactor,
+void generate_HKdfPub(const uint8_t *secret_key, const secp256k1_scalar *cofactor,
                       const secp256k1_gej *G_pts, const secp256k1_gej *J_pts,
                       HKdf_pub_packed_t *packed) {
   secp256k1_gej pkG, pkJ;

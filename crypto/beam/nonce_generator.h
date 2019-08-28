@@ -35,6 +35,6 @@ uint8_t nonce_generator_export_output_key(nonce_generator_t *nonce,
 uint8_t nonce_generator_export_scalar(nonce_generator_t *nonce,
                                       const uint8_t *context,
                                       uint8_t context_size,
-                                      scalar_t *out_scalar);
+                                      secp256k1_scalar *out_scalar);
 
 #endif  // _NONCE_GENERATOR_H_
