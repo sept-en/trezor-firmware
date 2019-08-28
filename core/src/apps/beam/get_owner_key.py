@@ -1,14 +1,10 @@
 import ubinascii
 
-from trezor import config, wire
 from trezor.crypto import beam
 from trezor.messages.BeamOwnerKey import BeamOwnerKey
-from trezor.messages.Failure import Failure
-from trezor.pin import pin_to_int
 
 from apps.beam.helpers import get_beam_kdf, rand_pswd
 from apps.beam.layout import beam_confirm_message
-from apps.common.request_pin import PinCancelled, request_pin
 
 
 async def get_owner_key(ctx, msg):
@@ -23,7 +19,9 @@ async def get_owner_key(ctx, msg):
     owner_key = generate_owner_key(pswd)
 
     if msg.show_display:
-        await beam_confirm_message(ctx, "Owner key", owner_key[:32] + " ... " + owner_key[-32:], True)
+        await beam_confirm_message(
+            ctx, "Owner key", owner_key[:32] + " ... " + owner_key[-32:], True
+        )
 
     await beam_confirm_message(ctx, "Key Password", pswd, False)
 
