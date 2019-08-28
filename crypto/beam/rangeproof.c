@@ -11,7 +11,7 @@ int tag_is_custom(const secp256k1_gej *h_gen) {
 void tag_add_value(const secp256k1_gej *h_gen, uint64_t value,
                    secp256k1_gej *out) {
   secp256k1_scalar value_scalar;
- secp256k1_scalar_set_u64(&value_scalar, value);
+  secp256k1_scalar_set_u64(&value_scalar, value);
   secp256k1_gej mul_result;
 
   if (tag_is_custom(h_gen))
@@ -48,7 +48,8 @@ void rangeproof_public_get_msg(rangeproof_public_t *rp, uint8_t *hash32,
   sha256_oracle_create(oracle, hash32);
 }
 
-void rangeproof_public_create(rangeproof_public_t *out, const secp256k1_scalar *sk,
+void rangeproof_public_create(rangeproof_public_t *out,
+                              const secp256k1_scalar *sk,
                               const rangeproof_creator_params_t *cp,
                               SHA256_CTX *oracle) {
   out->value = cp->kidv.value;
@@ -159,7 +160,8 @@ void rangeproof_confidential_create(rangeproof_confidential_t *out,
 }
 
 int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
-                                    const uint8_t *seed_sk, const secp256k1_scalar *sk,
+                                    const uint8_t *seed_sk,
+                                    const secp256k1_scalar *sk,
                                     const rangeproof_creator_params_t *cp,
                                     SHA256_CTX *oracle, phase_t phase,
                                     multi_sig_t *msig_out,
@@ -186,13 +188,13 @@ int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
   assing_aligned(pad.v.value, (uint8_t *)&cp->kidv.value, sizeof(pad.v.value));
 
   int overflow;
- secp256k1_scalar_set_b32(&ro, (const uint8_t *)&pad, &overflow);
+  secp256k1_scalar_set_b32(&ro, (const uint8_t *)&pad, &overflow);
   if (scalar_import_nnz(&ro, (const uint8_t *)&pad)) {
     // if overflow - the params won't be recovered properly, there may be
     // ambiguity
   }
 
- secp256k1_scalar_add(&alpha, &alpha, &ro);
+  secp256k1_scalar_add(&alpha, &alpha, &ro);
 
   rangeproof_confidential_calc_a(&out->part1.a, &alpha, cp->kidv.value);
 
@@ -224,12 +226,12 @@ int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
   rangeproof_confidential_challenge_set_t cs;
   rangeproof_confidential_challenge_set_init_1(&cs, &out->part1, oracle);
   secp256k1_scalar t0, t1, t2;
- secp256k1_scalar_clear(&t0);
- secp256k1_scalar_clear(&t1);
- secp256k1_scalar_clear(&t2);
+  secp256k1_scalar_clear(&t0);
+  secp256k1_scalar_clear(&t1);
+  secp256k1_scalar_clear(&t2);
   secp256k1_scalar l0, r0, rx, one, two, yPwr, zz_twoPwr;
- secp256k1_scalar_set_int(&one, 1U);
- secp256k1_scalar_set_int(&two, 2U);
+  secp256k1_scalar_set_int(&one, 1U);
+  secp256k1_scalar_set_int(&two, 2U);
 
   memcpy(&yPwr, &one, sizeof(secp256k1_scalar));
   memcpy(&zz_twoPwr, &cs.zz, sizeof(secp256k1_scalar));
@@ -237,41 +239,41 @@ int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
   for (uint32_t i = 0; i < INNER_PRODUCT_N_DIM; i++) {
     uint32_t bit = 1 & (cp->kidv.value >> i);
 
-   secp256k1_scalar_negate(&l0, &cs.z);
+    secp256k1_scalar_negate(&l0, &cs.z);
     if (bit) {
-     secp256k1_scalar_add(&l0, &l0, &one);
+      secp256k1_scalar_add(&l0, &l0, &one);
     }
 
     const secp256k1_scalar *lx = &p_s[0][i];
     memcpy(&r0, &cs.z, sizeof(secp256k1_scalar));
     if (!bit) {
       secp256k1_scalar minus_one;
-     secp256k1_scalar_negate(&minus_one, &one);
-     secp256k1_scalar_add(&r0, &r0, &minus_one);
+      secp256k1_scalar_negate(&minus_one, &one);
+      secp256k1_scalar_add(&r0, &r0, &minus_one);
     }
 
-   secp256k1_scalar_mul(&r0, &r0, &yPwr);
-   secp256k1_scalar_add(&r0, &r0, &zz_twoPwr);
+    secp256k1_scalar_mul(&r0, &r0, &yPwr);
+    secp256k1_scalar_add(&r0, &r0, &zz_twoPwr);
 
     memcpy(&rx, &yPwr, sizeof(secp256k1_scalar));
-   secp256k1_scalar_mul(&rx, &rx, &p_s[1][i]);
+    secp256k1_scalar_mul(&rx, &rx, &p_s[1][i]);
 
-   secp256k1_scalar_mul(&zz_twoPwr, &zz_twoPwr, &two);
-   secp256k1_scalar_mul(&yPwr, &yPwr, &cs.y);
+    secp256k1_scalar_mul(&zz_twoPwr, &zz_twoPwr, &two);
+    secp256k1_scalar_mul(&yPwr, &yPwr, &cs.y);
 
     secp256k1_scalar tmp;
 
-   secp256k1_scalar_mul(&tmp, &l0, &r0);
-   secp256k1_scalar_add(&t0, &t0, &tmp);
+    secp256k1_scalar_mul(&tmp, &l0, &r0);
+    secp256k1_scalar_add(&t0, &t0, &tmp);
 
-   secp256k1_scalar_mul(&tmp, &l0, &rx);
-   secp256k1_scalar_add(&t1, &t1, &tmp);
+    secp256k1_scalar_mul(&tmp, &l0, &rx);
+    secp256k1_scalar_add(&t1, &t1, &tmp);
 
-   secp256k1_scalar_mul(&tmp, lx, &r0);
-   secp256k1_scalar_add(&t1, &t1, &tmp);
+    secp256k1_scalar_mul(&tmp, lx, &r0);
+    secp256k1_scalar_add(&t1, &t1, &tmp);
 
-   secp256k1_scalar_mul(&tmp, lx, &rx);
-   secp256k1_scalar_add(&t2, &t2, &tmp);
+    secp256k1_scalar_mul(&tmp, lx, &rx);
+    secp256k1_scalar_add(&t2, &t2, &tmp);
   }
 
   rangeproof_confidential_multi_sig_t msig;
@@ -335,27 +337,27 @@ int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
   // m_TauX = tau2*x^2 + tau1*x + sk*z^2
   rangeproof_confidential_multi_sig_add_info2(&msig, &l0, sk, &cs);
 
-  if (SINGLE_PASS != phase)secp256k1_scalar_add(&l0, &l0, &out->part3.tauX);
+  if (SINGLE_PASS != phase) secp256k1_scalar_add(&l0, &l0, &out->part3.tauX);
 
   memcpy(&out->part3.tauX, &l0, sizeof(secp256k1_scalar));
 
   // m_Mu = alpha + ro*x
   memcpy(&l0, &ro, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&l0, &l0, &cs.x);
- secp256k1_scalar_add(&l0, &l0, &alpha);
+  secp256k1_scalar_mul(&l0, &l0, &cs.x);
+  secp256k1_scalar_add(&l0, &l0, &alpha);
   memcpy(&out->mu, &l0, sizeof(secp256k1_scalar));
 
   // m_tDot
   memcpy(&l0, &t0, sizeof(secp256k1_scalar));
 
   memcpy(&r0, &t1, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&r0, &r0, &cs.x);
- secp256k1_scalar_add(&l0, &l0, &r0);
+  secp256k1_scalar_mul(&r0, &r0, &cs.x);
+  secp256k1_scalar_add(&l0, &l0, &r0);
 
   memcpy(&r0, &t2, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&r0, &r0, &cs.x);
- secp256k1_scalar_mul(&r0, &r0, &cs.x);
- secp256k1_scalar_add(&l0, &l0, &r0);
+  secp256k1_scalar_mul(&r0, &r0, &cs.x);
+  secp256k1_scalar_mul(&r0, &r0, &cs.x);
+  secp256k1_scalar_add(&l0, &l0, &r0);
 
   memcpy(&out->tDot, &l0, sizeof(secp256k1_scalar));
 
@@ -367,31 +369,31 @@ int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
   for (uint32_t i = 0; i < INNER_PRODUCT_N_DIM; i++) {
     uint32_t bit = 1 & (cp->kidv.value >> i);
 
-   secp256k1_scalar_mul(&p_s[0][i], &p_s[0][i], &cs.x);
+    secp256k1_scalar_mul(&p_s[0][i], &p_s[0][i], &cs.x);
 
     secp256k1_scalar minus_cs_z;
-   secp256k1_scalar_negate(&minus_cs_z, &cs.z);
-   secp256k1_scalar_add(&p_s[0][i], &p_s[0][i], &minus_cs_z);
+    secp256k1_scalar_negate(&minus_cs_z, &cs.z);
+    secp256k1_scalar_add(&p_s[0][i], &p_s[0][i], &minus_cs_z);
 
-    if (bit)secp256k1_scalar_add(&p_s[0][i], &p_s[0][i], &one);
+    if (bit) secp256k1_scalar_add(&p_s[0][i], &p_s[0][i], &one);
 
-   secp256k1_scalar_mul(&p_s[1][i], &p_s[1][i], &cs.x);
-   secp256k1_scalar_mul(&p_s[1][i], &p_s[1][i], &yPwr);
+    secp256k1_scalar_mul(&p_s[1][i], &p_s[1][i], &cs.x);
+    secp256k1_scalar_mul(&p_s[1][i], &p_s[1][i], &yPwr);
 
     memcpy(&r0, &cs.z, sizeof(secp256k1_scalar));
     if (!bit) {
       secp256k1_scalar minus_one;
-     secp256k1_scalar_negate(&minus_one, &one);
-     secp256k1_scalar_add(&r0, &r0, &minus_one);
+      secp256k1_scalar_negate(&minus_one, &one);
+      secp256k1_scalar_add(&r0, &r0, &minus_one);
     }
 
-   secp256k1_scalar_mul(&r0, &r0, &yPwr);
-   secp256k1_scalar_add(&r0, &r0, &zz_twoPwr);
+    secp256k1_scalar_mul(&r0, &r0, &yPwr);
+    secp256k1_scalar_add(&r0, &r0, &zz_twoPwr);
 
-   secp256k1_scalar_add(&p_s[1][i], &p_s[1][i], &r0);
+    secp256k1_scalar_add(&p_s[1][i], &p_s[1][i], &r0);
 
-   secp256k1_scalar_mul(&zz_twoPwr, &zz_twoPwr, &two);
-   secp256k1_scalar_mul(&yPwr, &yPwr, &cs.y);
+    secp256k1_scalar_mul(&zz_twoPwr, &zz_twoPwr, &two);
+    secp256k1_scalar_mul(&yPwr, &yPwr, &cs.y);
   }
 
   inner_product_modifier_t mod;
@@ -450,9 +452,9 @@ void rangeproof_confidential_challenge_set_init_1(
   scalar_create_nnz(oracle, &cs->y);
   scalar_create_nnz(oracle, &cs->z);
 
- secp256k1_scalar_inverse(&cs->y_inv, &cs->y);
+  secp256k1_scalar_inverse(&cs->y_inv, &cs->y);
   memcpy(&cs->zz, &cs->z, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&cs->zz, &cs->zz, &cs->z);
+  secp256k1_scalar_mul(&cs->zz, &cs->zz, &cs->z);
 }
 
 void rangeproof_confidential_challenge_set_init_2(
@@ -482,34 +484,36 @@ void rangeproof_confidential_multi_sig_add_info1(
 
 void rangeproof_confidential_multi_sig_add_info2(
     rangeproof_confidential_multi_sig_t *msig, secp256k1_scalar *taux,
-    const secp256k1_scalar *sk, const rangeproof_confidential_challenge_set_t *cs) {
+    const secp256k1_scalar *sk,
+    const rangeproof_confidential_challenge_set_t *cs) {
   // taux = tau2*x^2 + tau1*x + sk*z^2
   memcpy(taux, &msig->tau2, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(taux, taux, &cs->x);
- secp256k1_scalar_mul(taux, taux, &cs->x);
+  secp256k1_scalar_mul(taux, taux, &cs->x);
+  secp256k1_scalar_mul(taux, taux, &cs->x);
 
   secp256k1_scalar t1;
   memcpy(&t1, &msig->tau1, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&t1, &t1, &cs->x);
- secp256k1_scalar_add(taux, taux, &t1);
+  secp256k1_scalar_mul(&t1, &t1, &cs->x);
+  secp256k1_scalar_add(taux, taux, &t1);
 
   memcpy(&t1, &cs->zz, sizeof(secp256k1_scalar));
- secp256k1_scalar_mul(&t1, &t1, sk);
- secp256k1_scalar_add(taux, taux, &t1);
+  secp256k1_scalar_mul(&t1, &t1, sk);
+  secp256k1_scalar_add(taux, taux, &t1);
 }
 
 void rangeproof_confidential_pack(rangeproof_confidential_packed_t *dest,
                                   rangeproof_confidential_t *src) {
   memcpy(&dest->part1, &src->part1, sizeof(dest->part1));
   memcpy(&dest->part2, &src->part2, sizeof(dest->part2));
- secp256k1_scalar_get_b32(dest->part3.tauX, &src->part3.tauX);
+  secp256k1_scalar_get_b32(dest->part3.tauX, &src->part3.tauX);
 
   memcpy(dest->p_tag.LR, src->p_tag.LR, sizeof(dest->p_tag.LR));
   const size_t condensed_count =
       sizeof(dest->p_tag.condensed) / sizeof(scalar_packed_t);
   for (size_t i = 0; i < condensed_count; i++)
-   secp256k1_scalar_get_b32(dest->p_tag.condensed[i], &src->p_tag.condensed[i]);
+    secp256k1_scalar_get_b32(dest->p_tag.condensed[i],
+                             &src->p_tag.condensed[i]);
 
- secp256k1_scalar_get_b32(dest->mu, &src->mu);
- secp256k1_scalar_get_b32(dest->tDot, &src->tDot);
+  secp256k1_scalar_get_b32(dest->mu, &src->mu);
+  secp256k1_scalar_get_b32(dest->tDot, &src->tDot);
 }

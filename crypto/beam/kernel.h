@@ -94,12 +94,13 @@ void peer_finalize_excess(secp256k1_scalar* peer_scalar, secp256k1_gej* kG,
                           secp256k1_scalar* k_offset);
 void peer_add_input(tx_inputs_vec_t* tx_inputs, secp256k1_scalar* peer_scalar,
                     uint64_t val, HKdf_t* kdf, const uint8_t* asset_id);
-void peer_add_output(tx_outputs_vec_t* tx_outputs, secp256k1_scalar* peer_scalar,
-                     uint64_t val, HKdf_t* kdf, const uint8_t* asset_id);
+void peer_add_output(tx_outputs_vec_t* tx_outputs,
+                     secp256k1_scalar* peer_scalar, uint64_t val, HKdf_t* kdf,
+                     const uint8_t* asset_id);
 void tx_output_get_seed_kid(const tx_output_t* output, uint8_t* seed,
                             HKdf_t* kdf);
-void tx_output_create(tx_output_t* output, secp256k1_scalar* sk, HKdf_t* coin_kdf,
-                      const key_idv_t* kidv, HKdf_t* tag_kdf,
+void tx_output_create(tx_output_t* output, secp256k1_scalar* sk,
+                      HKdf_t* coin_kdf, const key_idv_t* kidv, HKdf_t* tag_kdf,
                       uint8_t is_public);
 void create_tx_kernel(tx_kernels_vec_t* trg_kernels,
                       tx_kernels_vec_t* nested_kernels, uint64_t fee,
@@ -116,9 +117,11 @@ void cosign_kernel_part_1(tx_kernel_t* kernel, secp256k1_gej* kG,
                           uint8_t* kernel_hash_message,
                           const uint8_t* hash_lock_preimage);
 void cosign_kernel_part_2(tx_kernel_t* kernel, secp256k1_gej* xG,
-                          secp256k1_scalar* peer_scalars, secp256k1_scalar* peer_nonces,
-                          size_t num_peers, uint8_t* kernel_hash_message);
-uint8_t sign_transaction_part_1(int64_t* value_transferred, secp256k1_scalar* sk_total,
+                          secp256k1_scalar* peer_scalars,
+                          secp256k1_scalar* peer_nonces, size_t num_peers,
+                          uint8_t* kernel_hash_message);
+uint8_t sign_transaction_part_1(int64_t* value_transferred,
+                                secp256k1_scalar* sk_total,
                                 const kidv_vec_t* inputs,
                                 const kidv_vec_t* outputs,
                                 const transaction_data_t* tx_data,

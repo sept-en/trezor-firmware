@@ -357,4 +357,6 @@ secp256k1_scalar *get_pa(void) { return (secp256k1_scalar *)const_lut_pa; }
 
 secp256k1_scalar *get_pb(void) { return (secp256k1_scalar *)const_lut_pb; }
 
-secp256k1_scalar *get_pwr_mul(void) { return (secp256k1_scalar *)const_pwr_mul; }
+secp256k1_scalar *get_pwr_mul(void) {
+  return (secp256k1_scalar *)const_pwr_mul;
+}

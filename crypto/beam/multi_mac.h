@@ -50,7 +50,8 @@ void multi_mac_casual_init_new(multi_mac_casual_t *casual,
 void multi_mac_casual_init(multi_mac_casual_t *casual, const secp256k1_gej *p,
                            const secp256k1_scalar *k);
 
-void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux, const secp256k1_scalar *k,
+void multi_mac_fast_aux_schedule(_multi_mac_fast_aux_t *aux,
+                                 const secp256k1_scalar *k,
                                  unsigned int iBitsRemaining,
                                  unsigned int nMaxOdd, unsigned int *pTbl,
                                  unsigned int iThisEntry);

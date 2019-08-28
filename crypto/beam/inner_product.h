@@ -59,7 +59,8 @@ typedef struct {
 
 void inner_product_modifier_init(inner_product_modifier_t *mod);
 
-void inner_product_get_dot(secp256k1_scalar *out, const secp256k1_scalar *a, const secp256k1_scalar *b);
+void inner_product_get_dot(secp256k1_scalar *out, const secp256k1_scalar *a,
+                           const secp256k1_scalar *b);
 
 void calculator_aggregator_init(_calculator_aggregator_t *ag, multi_mac_t *mm,
                                 const _challenge_set_xset_t *x,

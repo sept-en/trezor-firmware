@@ -8,7 +8,7 @@ void test_set_buffer(void* p, uint32_t n, uint8_t value) {
 }
 
 void transaction_init(transaction_t* t) {
- secp256k1_scalar_clear(&t->offset);
+  secp256k1_scalar_clear(&t->offset);
   vec_init(&t->inputs);
   vec_init(&t->outputs);
   vec_init(&t->kernels);
@@ -37,7 +37,7 @@ void transaction_free_outputs(tx_outputs_vec_t* outputs) {
 }
 
 void signature_init(ecc_signature_t* signature) {
- secp256k1_scalar_clear(&signature->k);
+  secp256k1_scalar_clear(&signature->k);
   secp256k1_gej_set_infinity(&signature->nonce_pub);
 }
 
@@ -105,7 +105,7 @@ void kernel_init(tx_kernel_t* kernel) {
 }
 
 void HKdf_init(HKdf_t* kdf) {
- secp256k1_scalar_set_int(&kdf->cofactor, 1);
+  secp256k1_scalar_set_int(&kdf->cofactor, 1);
   memzero(kdf->generator_secret, DIGEST_LENGTH);
 }
 
@@ -195,7 +195,7 @@ void get_seed_kid_from_commitment(const point_t* commitment, uint8_t* seed,
              &kdf->cofactor, &sk);
 
   uint8_t sk_data[DIGEST_LENGTH];
- secp256k1_scalar_get_b32(sk_data, &sk);
+  secp256k1_scalar_get_b32(sk_data, &sk);
 
   SHA256_CTX hp2;
   sha256_Init(&hp2);

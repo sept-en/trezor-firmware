@@ -43,7 +43,8 @@ void signature_sign_partial(const secp256k1_scalar *multisig_nonce,
 void gej_mul_scalar(const secp256k1_gej *pt, const secp256k1_scalar *sk,
                     secp256k1_gej *res);
 
-void generate_HKdfPub(const uint8_t *secret_key, const secp256k1_scalar *cofactor,
+void generate_HKdfPub(const uint8_t *secret_key,
+                      const secp256k1_scalar *cofactor,
                       const secp256k1_gej *G_pts, const secp256k1_gej *J_pts,
                       HKdf_pub_packed_t *packed);
 

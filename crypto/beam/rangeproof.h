@@ -122,7 +122,8 @@ void rangeproof_public_xcrypt_kid(packed_key_id_t *kid,
 void rangeproof_public_get_msg(rangeproof_public_t *rp, uint8_t *hash32,
                                SHA256_CTX *oracle);
 
-void rangeproof_public_create(rangeproof_public_t *out, const secp256k1_scalar *sk,
+void rangeproof_public_create(rangeproof_public_t *out,
+                              const secp256k1_scalar *sk,
                               const rangeproof_creator_params_t *cp,
                               SHA256_CTX *oracle);
 
@@ -141,7 +142,8 @@ void rangeproof_confidential_create(rangeproof_confidential_t *out,
                                     const secp256k1_gej *h_gen);
 
 int rangeproof_confidential_co_sign(rangeproof_confidential_t *out,
-                                    const uint8_t *seed_sk, const secp256k1_scalar *sk,
+                                    const uint8_t *seed_sk,
+                                    const secp256k1_scalar *sk,
                                     const rangeproof_creator_params_t *cp,
                                     SHA256_CTX *oracle, phase_t phase,
                                     multi_sig_t *msig_out,
@@ -167,7 +169,8 @@ void rangeproof_confidential_multi_sig_add_info1(
 
 void rangeproof_confidential_multi_sig_add_info2(
     rangeproof_confidential_multi_sig_t *msig, secp256k1_scalar *taux,
-    const secp256k1_scalar *sk, const rangeproof_confidential_challenge_set_t *cs);
+    const secp256k1_scalar *sk,
+    const rangeproof_confidential_challenge_set_t *cs);
 
 void rangeproof_confidential_pack(rangeproof_confidential_packed_t *dest,
                                   rangeproof_confidential_t *src);

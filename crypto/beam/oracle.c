@@ -15,7 +15,7 @@ void sha256_oracle_update_pt(SHA256_CTX *oracle, const point_t *pt) {
 void sha256_oracle_update_sk(SHA256_CTX *oracle, const secp256k1_scalar *sk) {
   uint8_t sk_bytes[32];
   memset(sk_bytes, 0, 32);
- secp256k1_scalar_get_b32(sk_bytes, sk);
+  secp256k1_scalar_get_b32(sk_bytes, sk);
   sha256_Update(oracle, sk_bytes, 32);
 }
 
