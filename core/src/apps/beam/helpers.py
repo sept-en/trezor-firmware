@@ -1,4 +1,4 @@
-from trezor.crypto import beam
+from trezor.crypto import beam, random
 
 from apps.common import storage
 
@@ -71,3 +71,8 @@ def is_valid_beam_message(signature, public_key, message):
     )
 
     return is_valid
+
+def rand_pswd(size=8):
+    """Generate a random password of fixed length """
+    charset = "12346789ACDEFGHJKLMNPQRTUVWXYabcdefghijkmnopqrstuvwxyz"
+    return ''.join(charset[random.uniform(len(charset))] for _ in range(size))
