@@ -5,6 +5,13 @@
 #include "internal.h"
 #include "misc.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 // sk0_J is a result of multiplication of derived key and generator J
 void switch_commitment_get_sk1(const secp256k1_gej* commitment,
                                const secp256k1_gej* sk0_j,

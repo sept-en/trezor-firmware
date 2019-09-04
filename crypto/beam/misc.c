@@ -3,6 +3,13 @@
 #include "internal.h"
 #include "memzero.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 void test_set_buffer(void* p, uint32_t n, uint8_t value) {
   for (uint32_t i = 0; i < n; i++) ((uint8_t*)p)[i] = value;
 }

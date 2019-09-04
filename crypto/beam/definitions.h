@@ -1,8 +1,13 @@
 #ifndef _TYPES_H_
 #define _TYPES_H_
 
-#include "lib/secp256k1_primitives/group.h"
-#include "lib/secp256k1_primitives/scalar.h"
+#define USE_BASIC_CONFIG
+#include "lib/secp256k1-zkp/src/basic-config.h"
+#include "lib/secp256k1-zkp/include/secp256k1.h"
+#include "lib/secp256k1-zkp/src/field.h"
+#include "lib/secp256k1-zkp/src/group.h"
+#include "lib/secp256k1-zkp/src/scalar.h"
+
 #include "lib/vec.h"
 
 #define DIGEST_LENGTH 32

@@ -7,6 +7,13 @@
 #include "internal.h"
 #include "multi_mac.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 int memis0(const void *p, size_t n) {
   for (size_t i = 0; i < n; i++)
     if (((const uint8_t *)p)[i]) return 0;

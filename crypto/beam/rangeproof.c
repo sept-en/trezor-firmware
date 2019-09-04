@@ -3,6 +3,13 @@
 #include "memzero.h"
 #include "misc.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 int tag_is_custom(const secp256k1_gej *h_gen) {
   // secp256k1_gej_is_infinity == 0 means thath h_gen is zero
   return (h_gen != NULL) && (secp256k1_gej_is_infinity(h_gen) == 0);

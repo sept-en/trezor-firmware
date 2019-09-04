@@ -1,6 +1,13 @@
 #include "oracle.h"
 #include "internal.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 void sha256_oracle_update_gej(SHA256_CTX *oracle, const secp256k1_gej *gej) {
   point_t pt;
   export_gej_to_point(gej, &pt);

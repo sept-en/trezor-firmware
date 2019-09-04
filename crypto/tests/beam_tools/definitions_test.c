@@ -1,5 +1,12 @@
 #include "definitions_test.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "../../beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "../../beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "../../beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 const uint8_t const_pwr_mul[] = {
     0x87, 0xdc, 0x3d, 0x21, 0x41, 0x74, 0x82, 0x0e, 0x11, 0x54, 0xb4,
     0x9b, 0xc6, 0xcd, 0xb2, 0xab, 0xd4, 0x5e, 0xe9, 0x58, 0x17, 0x05,

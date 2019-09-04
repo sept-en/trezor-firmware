@@ -69,8 +69,7 @@ SRCS  += hmac_drbg.c
 SRCS  += rfc6979.c
 SRCS  += slip39.c
 SRCS  += beam/rangeproof.c beam/oracle.c beam/inner_product.c beam/multi_mac.c beam/nonce_generator.c  beam/internal.c beam/functions.c
-SRCS  += beam/definitions.c beam/definitions_ipp.c
-SRCS  += beam/lib/secp256k1_primitives/scalar.c beam/lib/secp256k1_primitives/field.c beam/lib/secp256k1_primitives/group.c beam/lib/secp256k1_primitives/util.c beam/lib/vec.c
+SRCS  += beam/definitions.c beam/definitions_ipp.c beam/lib/vec.c
 SRCS  += beam/kernel.c beam/misc.c
 
 OBJS   = $(SRCS:.c=.o)
@@ -100,7 +99,7 @@ tests/test_openssl: tests/test_openssl.o $(OBJS)
 	$(CC) tests/test_openssl.o $(OBJS) $(TESTSSLLIBS) -o tests/test_openssl
 
 tests/test_check_beam: tests/beam_tools/base64.o tests/beam_tools/definitions_test.o tests/test_check_beam.o $(OBJS)
-	$(CC) -o tests/test_check_beam -I. tests/beam_tools/base64.o tests/beam_tools/definitions_test.o tests/test_check_beam.o $(OBJS)
+	$(CC) -o tests/test_check_beam tests/beam_tools/base64.o tests/beam_tools/definitions_test.o tests/test_check_beam.o $(OBJS)
 
 tests/libtrezor-crypto.so: $(SRCS)
 	$(CC) $(CFLAGS) -DAES_128 -DAES_192 -fPIC -shared $(SRCS) -o tests/libtrezor-crypto.so

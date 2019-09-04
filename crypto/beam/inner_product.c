@@ -1,5 +1,12 @@
 #include "inner_product.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 void inner_product_modifier_init(inner_product_modifier_t *mod) {
   memset(mod->multiplier, 0, sizeof(mod->multiplier));
 }

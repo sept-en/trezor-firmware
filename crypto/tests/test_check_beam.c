@@ -9,6 +9,13 @@
 #include "beam_tools/base64.h"
 #include "beam_tools/definitions_test.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+#include "../beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "../beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "../beam/lib/secp256k1-zkp/src/scalar_impl.h"
+#pragma GCC diagnostic pop
+
 #define BEAM_DEBUG 1
 #define START_TEST(func)                                                    \
   do {                                                                      \
