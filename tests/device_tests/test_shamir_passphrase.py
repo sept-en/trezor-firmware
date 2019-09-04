@@ -19,17 +19,10 @@ import pytest
 
 from trezorlib import btc
 
-from .conftest import setup_client
+from .common import MNEMONIC_SHAMIR_20_3of6
 
 
-@setup_client(
-    mnemonic=(
-        "extra extend academic bishop cricket bundle tofu goat apart victim enlarge program behavior permit course armed jerky faint language modern",
-        "extra extend academic acne away best indicate impact square oasis prospect painting voting guest either argue username racism enemy eclipse",
-        "extra extend academic arcade born dive legal hush gross briefing talent drug much home firefly toxic analysis idea umbrella slice",
-    ),
-    passphrase=True,
-)
+@pytest.mark.setup_client(mnemonic=MNEMONIC_SHAMIR_20_3of6, passphrase=True)
 @pytest.mark.skip_t1
 def test_3of6_passphrase(client):
     """
@@ -43,7 +36,7 @@ def test_3of6_passphrase(client):
     assert address == "18oZEMRWurCZW1FeK8sWYyXuWx2bFqEKyX"
 
 
-@setup_client(
+@pytest.mark.setup_client(
     mnemonic=(
         "hobo romp academic axis august founder knife legal recover alien expect emphasis loan kitchen involve teacher capture rebuild trial numb spider forward ladle lying voter typical security quantity hawk legs idle leaves gasoline",
         "hobo romp academic agency ancestor industry argue sister scene midst graduate profile numb paid headset airport daisy flame express scene usual welcome quick silent downtown oral critical step remove says rhythm venture aunt",

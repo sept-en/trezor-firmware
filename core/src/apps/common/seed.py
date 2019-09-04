@@ -1,5 +1,6 @@
 from trezor import wire
 from trezor.crypto import bip32, hashlib, hmac
+from trezor.crypto.curve import secp256k1
 
 from apps.common import HARDENED, cache, mnemonic, storage
 from apps.common.request_passphrase import protect_by_passphrase
@@ -48,7 +49,7 @@ class Keychain:
 
     def __del__(self) -> None:
         for root in self.roots:
-            if root is not None:
+            if root is not None and hasattr(root, "__del__"):
                 root.__del__()
         del self.roots
         del self.seed
@@ -93,6 +94,17 @@ class Keychain:
         node.derive_path(suffix)
         return node
 
+    def derive_slip77_blinding_private_key(self, script: bytes) -> bytes:
+        """Following the derivation by Elements/Liquid."""
+        master_node = self.derive(node_path=[b"SLIP-0077"], curve_name="slip21")
+        return hmac.new(
+            key=master_node.key(), msg=script, digestmod=hashlib.sha256
+        ).digest()
+
+    def derive_slip77_blinding_public_key(self, script: bytes) -> bytes:
+        private_key = self.derive_slip77_blinding_private_key(script)
+        return secp256k1.publickey(private_key)
+
 
 async def get_keychain(ctx: wire.Context, namespaces: list) -> Keychain:
     if not storage.is_initialized():
@@ -114,7 +126,10 @@ def derive_node_without_passphrase(
 ) -> bip32.HDNode:
     if not storage.is_initialized():
         raise Exception("Device is not initialized")
-    seed = mnemonic.get_seed(progress_bar=False)
+    seed = cache.get_seed_without_passphrase()
+    if seed is None:
+        seed = mnemonic.get_seed(progress_bar=False)
+        cache.set_seed_without_passphrase(seed)
     node = bip32.from_seed(seed, curve_name)
     node.derive_path(path)
     return node
@@ -123,7 +138,10 @@ def derive_node_without_passphrase(
 def derive_slip21_node_without_passphrase(path: list) -> Slip21Node:
     if not storage.is_initialized():
         raise Exception("Device is not initialized")
-    seed = mnemonic.get_seed(progress_bar=False)
+    seed = cache.get_seed_without_passphrase()
+    if seed is None:
+        seed = mnemonic.get_seed(progress_bar=False)
+        cache.set_seed_without_passphrase(seed)
     node = Slip21Node(seed)
     node.derive_path(path)
     return node

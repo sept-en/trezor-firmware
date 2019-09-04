@@ -3,7 +3,7 @@ import pytest
 from trezorlib import device, messages
 from trezorlib.exceptions import TrezorFailure
 
-from .conftest import setup_client
+from .common import recovery_enter_shares
 
 pytestmark = pytest.mark.skip_t1
 
@@ -19,7 +19,7 @@ INVALID_SHARES_20_2of3 = [
 ]
 
 
-@setup_client(mnemonic=SHARES_20_2of3[0:2], passphrase=True)
+@pytest.mark.setup_client(mnemonic=SHARES_20_2of3[0:2], passphrase=True)
 def test_2of3_dryrun(client):
     debug = client.debug
 
@@ -27,7 +27,7 @@ def test_2of3_dryrun(client):
         yield  # Confirm Dryrun
         debug.press_yes()
         # run recovery flow
-        yield from enter_all_shares(debug, SHARES_20_2of3[1:3])
+        yield from recovery_enter_shares(debug, SHARES_20_2of3[1:3])
 
     with client:
         client.set_input_flow(input_flow)
@@ -47,7 +47,7 @@ def test_2of3_dryrun(client):
     )
 
 
-@setup_client(mnemonic=SHARES_20_2of3[0:2], passphrase=True)
+@pytest.mark.setup_client(mnemonic=SHARES_20_2of3[0:2], passphrase=True)
 def test_2of3_invalid_seed_dryrun(client):
     debug = client.debug
 
@@ -55,7 +55,7 @@ def test_2of3_invalid_seed_dryrun(client):
         yield  # Confirm Dryrun
         debug.press_yes()
         # run recovery flow
-        yield from enter_all_shares(debug, INVALID_SHARES_20_2of3)
+        yield from recovery_enter_shares(debug, INVALID_SHARES_20_2of3)
 
     # test fails because of different seed on device
     with client, pytest.raises(
@@ -71,30 +71,3 @@ def test_2of3_invalid_seed_dryrun(client):
             dry_run=True,
             type=messages.ResetDeviceBackupType.Slip39_Single_Group,
         )
-
-
-def enter_all_shares(debug, shares):
-    word_count = len(shares[0].split(" "))
-
-    # Homescreen - proceed to word number selection
-    yield
-    debug.press_yes()
-    # Input word number
-    code = yield
-    assert code == messages.ButtonRequestType.MnemonicWordCount
-    debug.input(str(word_count))
-    # Homescreen - proceed to share entry
-    yield
-    debug.press_yes()
-    # Enter shares
-    for share in shares:
-        code = yield
-        assert code == messages.ButtonRequestType.MnemonicInput
-        # Enter mnemonic words
-        for word in share.split(" "):
-            debug.input(word)
-
-        # Homescreen - continue
-        # or Homescreen - confirm success
-        yield
-        debug.press_yes()
