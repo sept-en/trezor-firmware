@@ -2,8 +2,8 @@
 #define _TYPES_H_
 
 #define USE_BASIC_CONFIG
-#include "lib/secp256k1-zkp/src/basic-config.h"
 #include "lib/secp256k1-zkp/include/secp256k1.h"
+#include "lib/secp256k1-zkp/src/basic-config.h"
 #include "lib/secp256k1-zkp/src/field.h"
 #include "lib/secp256k1-zkp/src/group.h"
 #include "lib/secp256k1-zkp/src/scalar.h"
