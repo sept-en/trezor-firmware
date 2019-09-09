@@ -27,8 +27,9 @@ async def sign_transaction(ctx, msg):
     )
 
     tx_action_message = "RECEIVE" if value_transferred <= 0 else "TRANSFER"
+    tx_msg = "Please confirm  " + ("receiving " if value_transferred <= 0 else "sending ") + str(abs(value_transferred)) + " Groths"
     await beam_confirm_message(
-        ctx, tx_action_message + ": ", str(abs(value_transferred)), False
+        ctx, tx_action_message + ": ", tx_msg, False
     )
 
     signature, is_signed = sign_tx_part_2(tm, sk_total, msg.nonce_slot)
