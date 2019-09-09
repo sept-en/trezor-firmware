@@ -607,7 +607,7 @@ STATIC mp_obj_t mod_trezorcrypto_beam_export_owner_key(size_t n_args,
                     (const uint8_t*)pin_code.buf, pin_size);
   free_context();
 
-  memcpy(out_owner_key.buf, owner_key, 145);
+  memcpy(out_owner_key.buf, owner_key, 108);
   free(owner_key);
   owner_key = NULL;
 

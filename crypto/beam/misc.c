@@ -191,8 +191,7 @@ void get_seed_kid_from_commitment(const point_t* commitment, uint8_t* seed,
   sha256_Final(&hp, seed);
 
   secp256k1_scalar sk;
-  derive_key(kdf->generator_secret, DIGEST_LENGTH, seed, DIGEST_LENGTH,
-             &kdf->cofactor, &sk);
+  derive_pkey(kdf->generator_secret, DIGEST_LENGTH, seed, DIGEST_LENGTH, &sk);
 
   uint8_t sk_data[DIGEST_LENGTH];
   secp256k1_scalar_get_b32(sk_data, &sk);

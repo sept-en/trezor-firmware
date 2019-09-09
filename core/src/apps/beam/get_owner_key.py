@@ -29,8 +29,7 @@ async def get_owner_key(ctx, msg):
 
 
 def generate_owner_key(passphrase, mnemonic=None):
-    # AES encoded owner key takes 109 bytes (if password length is 8)
-    owner_key = bytearray(109)
+    owner_key = bytearray(108)
     master_secret, master_cofactor = get_beam_kdf(mnemonic)
     beam.export_owner_key(
         master_secret, master_cofactor, passphrase, len(passphrase), owner_key
