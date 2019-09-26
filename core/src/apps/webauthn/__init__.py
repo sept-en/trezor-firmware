@@ -1593,13 +1593,13 @@ def cbor_get_assertion_sign(
 
 def cbor_get_info(req: Cmd) -> Cmd:
     response_data = {
-        _GETINFO_RESP_VERSIONS: ["FIDO_2_0"],
+        _GETINFO_RESP_VERSIONS: ["U2F_V2", "FIDO_2_0"],
         _GETINFO_RESP_EXTENSIONS: ["hmac-secret"],
         _GETINFO_RESP_AAGUID: _AAGUID,
         _GETINFO_RESP_OPTIONS: {
             "rk": _ALLOW_RESIDENT_CREDENTIALS,
             "up": True,
-            "uv": config.has_pin(),
+            "uv": True,
         },
     }
     return Cmd(req.cid, _CMD_CBOR, bytes([_ERR_NONE]) + cbor.encode(response_data))
