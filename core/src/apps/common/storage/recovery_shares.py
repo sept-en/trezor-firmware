@@ -1,6 +1,6 @@
 from trezor.crypto import slip39
 
-from apps.common.storage import common, recovery
+from apps.common.storage import common
 
 if False:
     from typing import List, Optional
@@ -9,33 +9,27 @@ if False:
 # Each mnemonic is stored under key = index.
 
 
-def set(index: int, mnemonic: str) -> None:
-    common._set(common._APP_RECOVERY_SHARES, index, mnemonic.encode())
+def set(index: int, group_index: int, mnemonic: str) -> None:
+    common.set(
+        common.APP_RECOVERY_SHARES,
+        index + group_index * slip39.MAX_SHARE_COUNT,
+        mnemonic.encode(),
+    )
 
 
-def get(index: int) -> Optional[str]:
-    m = common._get(common._APP_RECOVERY_SHARES, index)
+def get(index: int, group_index: int) -> Optional[str]:
+    m = common.get(
+        common.APP_RECOVERY_SHARES, index + group_index * slip39.MAX_SHARE_COUNT
+    )
     if m:
         return m.decode()
     return None
 
 
-def fetch() -> List[str]:
-    mnemonics = []
-    if not recovery.get_slip39_group_count():
-        raise RuntimeError
-    for index in range(0, slip39.MAX_SHARE_COUNT * recovery.get_slip39_group_count()):
-        m = get(index)
-        if m:
-            mnemonics.append(m)
-    return mnemonics
-
-
 def fetch_group(group_index: int) -> List[str]:
     mnemonics = []
-    starting_index = 0 + group_index * slip39.MAX_SHARE_COUNT
-    for index in range(starting_index, starting_index + slip39.MAX_SHARE_COUNT):
-        m = get(index)
+    for index in range(slip39.MAX_SHARE_COUNT):
+        m = get(index, group_index)
         if m:
             mnemonics.append(m)
 
@@ -43,5 +37,5 @@ def fetch_group(group_index: int) -> List[str]:
 
 
 def delete() -> None:
-    for index in range(0, slip39.MAX_SHARE_COUNT):
-        common._delete(common._APP_RECOVERY_SHARES, index)
+    for index in range(slip39.MAX_SHARE_COUNT * slip39.MAX_GROUP_COUNT):
+        common.delete(common.APP_RECOVERY_SHARES, index)

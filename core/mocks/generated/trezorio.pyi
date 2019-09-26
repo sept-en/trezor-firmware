@@ -75,7 +75,7 @@ class FatFS:
         List a directory (return generator)
         """
 
-    def mkdir(self, path: str) -> None:
+    def mkdir(self, path: str, exist_ok: bool=False) -> None:
         """
         Create a sub directory
         """
@@ -167,6 +167,11 @@ class HID:
         """
 
     def write(self, msg: bytes) -> int:
+        """
+        Sends message using USB HID (device) or UDP (emulator).
+        """
+
+    def write_blocking(self, msg: bytes, timeout_ms: int) -> int:
         """
         Sends message using USB HID (device) or UDP (emulator).
         """

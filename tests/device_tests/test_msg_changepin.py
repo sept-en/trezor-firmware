@@ -18,12 +18,12 @@ import pytest
 
 from trezorlib import messages as proto
 
-from .common import MNEMONIC12, TrezorTest
+PIN4 = "1234"
+PIN6 = "789456"
 
 
 @pytest.mark.skip_t2
-class TestMsgChangepin(TrezorTest):
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12)
+class TestMsgChangepin:
     def test_set_pin(self, client):
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is False
@@ -42,12 +42,12 @@ class TestMsgChangepin(TrezorTest):
 
         # Send the PIN for first time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Send the PIN for second time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Now we're done
@@ -58,9 +58,9 @@ class TestMsgChangepin(TrezorTest):
         assert features.pin_protection is True
 
         # Check that the PIN is correct
-        self.check_pin(client, self.pin6)
+        self.check_pin(client, PIN6)
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=True)
     def test_change_pin(self, client):
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is True
@@ -71,7 +71,7 @@ class TestMsgChangepin(TrezorTest):
         client.call_raw(proto.Cancel())
 
         # Check current PIN value
-        self.check_pin(client, self.pin4)
+        self.check_pin(client, PIN4)
 
         # Let's change PIN
         ret = client.call_raw(proto.ChangePin())
@@ -88,12 +88,12 @@ class TestMsgChangepin(TrezorTest):
 
         # Send new PIN for first time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Send the PIN for second time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Now we're done
@@ -104,9 +104,9 @@ class TestMsgChangepin(TrezorTest):
         assert features.pin_protection is True
 
         # Check that the PIN is correct
-        self.check_pin(client, self.pin6)
+        self.check_pin(client, PIN6)
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=True)
     def test_remove_pin(self, client):
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is True
@@ -138,7 +138,6 @@ class TestMsgChangepin(TrezorTest):
         ret = client.call_raw(proto.Ping(pin_protection=True))
         assert isinstance(ret, proto.Success)
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12)
     def test_set_failed(self, client):
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is False
@@ -157,12 +156,12 @@ class TestMsgChangepin(TrezorTest):
 
         # Send the PIN for first time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Send the PIN for second time, but with typo
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin4)
+        pin_encoded = client.debug.encode_pin(PIN4)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Now it should fail, because pins are different
@@ -174,7 +173,7 @@ class TestMsgChangepin(TrezorTest):
         ret = client.call_raw(proto.Ping(pin_protection=True))
         assert isinstance(ret, proto.Success)
 
-    @pytest.mark.setup_client(mnemonic=MNEMONIC12, pin=True, passphrase=True)
+    @pytest.mark.setup_client(pin=True)
     def test_set_failed_2(self, client):
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is True
@@ -194,12 +193,12 @@ class TestMsgChangepin(TrezorTest):
 
         # Send the PIN for first time
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6)
+        pin_encoded = client.debug.encode_pin(PIN6)
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Send the PIN for second time, but with typo
         assert isinstance(ret, proto.PinMatrixRequest)
-        pin_encoded = client.debug.encode_pin(self.pin6 + "3")
+        pin_encoded = client.debug.encode_pin(PIN6 + "3")
         ret = client.call_raw(proto.PinMatrixAck(pin=pin_encoded))
 
         # Now it should fail, because pins are different
@@ -208,7 +207,7 @@ class TestMsgChangepin(TrezorTest):
         # Check that there's still old PIN protection
         features = client.call_raw(proto.Initialize())
         assert features.pin_protection is True
-        self.check_pin(client, self.pin4)
+        self.check_pin(client, PIN4)
 
     def check_pin(self, client, pin):
         client.clear_session()

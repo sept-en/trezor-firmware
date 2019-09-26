@@ -1,5 +1,6 @@
 from trezor import config, wire
 from trezor.crypto import bip39, random, slip39
+from trezor.messages import BackupType
 from trezor.messages.Success import Success
 from trezor.pin import pin_to_int
 from trezor.ui.text import Text
@@ -7,9 +8,50 @@ from trezor.ui.text import Text
 from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
 from apps.common import mnemonic, storage
 from apps.common.confirm import require_confirm
+from apps.management import backup_types
 
 
 async def load_device(ctx, msg):
+    word_count = _validate(msg)
+    is_slip39 = backup_types.is_slip39_word_count(word_count)
+
+    if not is_slip39 and not msg.skip_checksum and not bip39.check(msg.mnemonics[0]):
+        raise wire.ProcessError("Mnemonic is not valid")
+
+    await _warn(ctx)
+
+    if not is_slip39:  # BIP-39
+        secret = msg.mnemonics[0].encode()
+        backup_type = BackupType.Bip39
+    else:
+        identifier, iteration_exponent, secret, group_count = slip39.combine_mnemonics(
+            msg.mnemonics
+        )
+        if group_count == 1:
+            backup_type = BackupType.Slip39_Basic
+        elif group_count > 1:
+            backup_type = BackupType.Slip39_Advanced
+        else:
+            raise RuntimeError("Invalid group count")
+        storage.device.set_slip39_identifier(identifier)
+        storage.device.set_slip39_iteration_exponent(iteration_exponent)
+
+    storage.device.store_mnemonic_secret(
+        secret, backup_type, needs_backup=True, no_backup=False
+    )
+    storage.device.load_settings(
+        use_passphrase=msg.passphrase_protection, label=msg.label
+    )
+    if msg.pin:
+        config.change_pin(pin_to_int(""), pin_to_int(msg.pin), None, None)
+
+    beam_nonce_seed = random.bytes(32)
+    create_beam_master_nonce(beam_nonce_seed)
+
+    return Success(message="Device loaded")
+
+
+def _validate(msg) -> int:
     if storage.is_initialized():
         raise wire.UnexpectedMessage("Already initialized")
 
@@ -26,39 +68,11 @@ async def load_device(ctx, msg):
                 "All shares are required to have the same number of words"
             )
 
-    mnemonic_type = mnemonic.type_from_word_count(word_count)
+    return word_count
 
-    if (
-        mnemonic_type == mnemonic.TYPE_BIP39
-        and not msg.skip_checksum
-        and not bip39.check(msg.mnemonics[0])
-    ):
-        raise wire.ProcessError("Mnemonic is not valid")
 
+async def _warn(ctx: wire.Context):
     text = Text("Loading seed")
     text.bold("Loading private seed", "is not recommended.")
     text.normal("Continue only if you", "know what you are doing!")
     await require_confirm(ctx, text)
-
-    if mnemonic_type == mnemonic.TYPE_BIP39:
-        secret = msg.mnemonics[0].encode()
-    elif mnemonic_type == mnemonic.TYPE_SLIP39:
-        identifier, iteration_exponent, secret = slip39.combine_mnemonics(msg.mnemonics)
-        storage.device.set_slip39_identifier(identifier)
-        storage.device.set_slip39_iteration_exponent(iteration_exponent)
-    else:
-        raise RuntimeError("Unknown mnemonic type")
-
-    storage.device.store_mnemonic_secret(
-        secret, mnemonic_type, needs_backup=True, no_backup=False
-    )
-    storage.device.load_settings(
-        use_passphrase=msg.passphrase_protection, label=msg.label
-    )
-    if msg.pin:
-        config.change_pin(pin_to_int(""), pin_to_int(msg.pin))
-
-    beam_nonce_seed = random.bytes(32)
-    create_beam_master_nonce(beam_nonce_seed)
-
-    return Success(message="Device loaded")

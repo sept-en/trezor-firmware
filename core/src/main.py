@@ -48,8 +48,8 @@ def _boot_default() -> None:
 
     if __debug__:
         import apps.debug
-    else:
-        if not utils.BITCOIN_ONLY:
+    if not utils.BITCOIN_ONLY:
+        if not __debug__ or utils.EMULATOR:
             import apps.webauthn
 
     # boot applications
@@ -70,8 +70,8 @@ def _boot_default() -> None:
         apps.binance.boot()
     if __debug__:
         apps.debug.boot()
-    else:
-        if not utils.BITCOIN_ONLY:
+    if not utils.BITCOIN_ONLY:
+        if not __debug__ or utils.EMULATOR:
             apps.webauthn.boot(usb.iface_webauthn)
 
     # run main event loop and specify which screen is the default

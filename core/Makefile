@@ -71,6 +71,9 @@ test_emu: ## run selected device tests from python-trezor
 test_emu_monero: ## run selected monero device tests from monero-agent
 	cd tests ; ./run_tests_device_emu_monero.sh $(TESTOPTS)
 
+test_emu_u2f: ## run selected u2f device tests from u2f-tests-hid
+	cd tests ; ./run_tests_device_emu_u2f.sh $(TESTOPTS)
+
 pylint: ## run pylint on application sources and tests
 	pylint -E $(shell find src tests -name *.py)
 
@@ -107,7 +110,7 @@ build_reflash: ## build reflash firmware + reflash image
 	dd if=build/bootloader/bootloader.bin of=$(REFLASH_BUILD_DIR)/sdimage.bin bs=1 seek=49152
 
 build_firmware: res build_cross ## build firmware with frozen modules
-	$(SCONS) CFLAGS="$(CFLAGS)" PRODUCTION="$(PRODUCTION)" BITCOIN_ONLY="$(BITCOIN_ONLY)" $(FIRMWARE_BUILD_DIR)/firmware.bin
+	$(SCONS) CFLAGS="$(CFLAGS)" PRODUCTION="$(PRODUCTION)" PYOPT="$(PYOPT)" BITCOIN_ONLY="$(BITCOIN_ONLY)" $(FIRMWARE_BUILD_DIR)/firmware.bin
 
 build_unix: res ## build unix port
 	$(SCONS) CFLAGS="$(CFLAGS)" $(UNIX_BUILD_DIR)/micropython $(UNIX_PORT_OPTS) BITCOIN_ONLY="$(BITCOIN_ONLY)"

@@ -217,6 +217,7 @@ from .RippleGetAddress import RippleGetAddress
 from .RipplePayment import RipplePayment
 from .RippleSignTx import RippleSignTx
 from .RippleSignedTx import RippleSignedTx
+from .SdProtect import SdProtect
 from .SelfTest import SelfTest
 from .SetU2FCounter import SetU2FCounter
 from .SignIdentity import SignIdentity
@@ -263,9 +264,15 @@ from .TxRequest import TxRequest
 from .TxRequestDetailsType import TxRequestDetailsType
 from .TxRequestSerializedType import TxRequestSerializedType
 from .VerifyMessage import VerifyMessage
+from .WebAuthnAddResidentCredential import WebAuthnAddResidentCredential
+from .WebAuthnCredential import WebAuthnCredential
+from .WebAuthnCredentials import WebAuthnCredentials
+from .WebAuthnListResidentCredentials import WebAuthnListResidentCredentials
+from .WebAuthnRemoveResidentCredential import WebAuthnRemoveResidentCredential
 from .WipeDevice import WipeDevice
 from .WordAck import WordAck
 from .WordRequest import WordRequest
+from . import BackupType
 from . import BinanceOrderSide
 from . import BinanceOrderType
 from . import BinanceTimeInForce
@@ -284,7 +291,7 @@ from . import PassphraseSourceType
 from . import PinMatrixRequestType
 from . import RecoveryDeviceType
 from . import RequestType
-from . import ResetDeviceBackupType
+from . import SdProtectOperationType
 from . import TezosBallotType
 from . import TezosContractType
 from . import WordRequestType

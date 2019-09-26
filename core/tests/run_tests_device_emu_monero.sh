@@ -1,28 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 : "${RUN_PYTHON_TESTS:=0}"
 : "${FORCE_DOCKER_USE:=0}"
 : "${RUN_TEST_EMU:=1}"
 
-SDIR="$(SHELL_SESSION_FILE='' && cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-CORE_DIR="$SDIR/.."
+CORE_DIR="$(SHELL_SESSION_FILE='' && cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
 MICROPYTHON="${MICROPYTHON:-$CORE_DIR/build/unix/micropython}"
+TREZOR_SRC="${CORE_DIR}/src"
+
 DISABLE_FADE=1
-PYOPT=0
+PYOPT="${PYOPT:-0}"
 upy_pid=""
 
 # run emulator if RUN_TEST_EMU
 if [[ $RUN_TEST_EMU > 0 ]]; then
-  cd "$CORE_DIR/src"
+  source ../trezor_cmd.sh
+
+  # remove flash and sdcard files before run to prevent inconsistent states
+  mv "${TREZOR_PROFILE_DIR}/trezor.flash" "${TREZOR_PROFILE_DIR}/trezor.flash.bkp" 2>/dev/null
+  mv "${TREZOR_PROFILE_DIR}/trezor.sdcard" "${TREZOR_PROFILE_DIR}/trezor.sdcard.bkp" 2>/dev/null
+
+  cd "${TREZOR_SRC}"
+  echo "Starting emulator: $MICROPYTHON $ARGS ${MAIN}"
+
   TREZOR_TEST=1 \
   TREZOR_DISABLE_FADE=$DISABLE_FADE \
-    "$MICROPYTHON" -O$PYOPT main.py >/dev/null &
+    $MICROPYTHON $ARGS "${MAIN}" &> "${TREZOR_LOGFILE}" &
   upy_pid=$!
   cd -
-  sleep 1
+  sleep 30
 fi
 
-export TREZOR_PATH=udp:127.0.0.1:21324
 DOCKER_ID=""
 
 # Test termination trap
@@ -102,4 +110,3 @@ else
 fi
 
 exit $error
-

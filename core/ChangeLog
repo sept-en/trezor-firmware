@@ -1,11 +1,21 @@
 Version 2.x.x [not yet released]
 * nothing yet
 
+Version 2.1.6 [to be released Oct 2019]
+* Refactor Shamir related codebase
+* Super Shamir
+* FIDO2
+* FIDO2 credential management via trezorctl
+* SD card protection
+* BackupType in Features
+
 Version 2.1.5 [Sep 2019]
 * Introduce Bitcoin-only firmware
 * Fix for sluggish U2F authentication when using Shamir
 * Fix UI for Shamir with 33 words
 * Fix Wanchain signing
+* Binance Coin support
+* Introduce Features.Capabilities
 
 Version 2.1.4 [Aug 2019 hotfix]
 * Shamir Backup reset device hotfix
