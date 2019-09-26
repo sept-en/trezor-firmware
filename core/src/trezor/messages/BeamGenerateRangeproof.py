@@ -13,7 +13,7 @@ if __debug__:
 
 
 class BeamGenerateRangeproof(p.MessageType):
-    MESSAGE_WIRE_TYPE = 812
+    MESSAGE_WIRE_TYPE = 912
 
     def __init__(
         self,

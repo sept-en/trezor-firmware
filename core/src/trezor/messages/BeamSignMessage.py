@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamSignMessage(p.MessageType):
-    MESSAGE_WIRE_TYPE = 802
+    MESSAGE_WIRE_TYPE = 902
 
     def __init__(
         self,

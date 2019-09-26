@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamGenerateNonce(p.MessageType):
-    MESSAGE_WIRE_TYPE = 810
+    MESSAGE_WIRE_TYPE = 910
 
     def __init__(
         self,

@@ -13,7 +13,7 @@ if __debug__:
 
 
 class BeamSignature(p.MessageType):
-    MESSAGE_WIRE_TYPE = 803
+    MESSAGE_WIRE_TYPE = 903
 
     def __init__(
         self,

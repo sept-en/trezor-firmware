@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamOwnerKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 808
+    MESSAGE_WIRE_TYPE = 908
 
     def __init__(
         self,

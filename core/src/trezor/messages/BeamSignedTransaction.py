@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamSignedTransaction(p.MessageType):
-    MESSAGE_WIRE_TYPE = 815
+    MESSAGE_WIRE_TYPE = 915
 
     def __init__(
         self,

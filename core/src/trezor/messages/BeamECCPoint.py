@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamECCPoint(p.MessageType):
-    MESSAGE_WIRE_TYPE = 811
+    MESSAGE_WIRE_TYPE = 911
 
     def __init__(
         self,

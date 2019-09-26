@@ -14,7 +14,7 @@ if __debug__:
 
 
 class BeamVerifyMessage(p.MessageType):
-    MESSAGE_WIRE_TYPE = 804
+    MESSAGE_WIRE_TYPE = 904
 
     def __init__(
         self,

@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamRangeproofData(p.MessageType):
-    MESSAGE_WIRE_TYPE = 813
+    MESSAGE_WIRE_TYPE = 913
 
     def __init__(
         self,

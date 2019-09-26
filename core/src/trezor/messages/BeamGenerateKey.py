@@ -13,7 +13,7 @@ if __debug__:
 
 
 class BeamGenerateKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 809
+    MESSAGE_WIRE_TYPE = 909
 
     def __init__(
         self,

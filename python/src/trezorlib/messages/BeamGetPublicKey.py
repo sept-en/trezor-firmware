@@ -11,7 +11,7 @@ if __debug__:
 
 
 class BeamGetPublicKey(p.MessageType):
-    MESSAGE_WIRE_TYPE = 805
+    MESSAGE_WIRE_TYPE = 905
 
     def __init__(
         self,
