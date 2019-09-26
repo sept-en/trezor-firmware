@@ -1,3 +1,4 @@
+import gc
 from trezor.messages import ButtonRequestType
 from trezor.messages.BeamECCPoint import BeamECCPoint
 
@@ -6,6 +7,8 @@ from apps.beam.layout import beam_confirm_message
 
 
 async def get_public_key(ctx, msg):
+    gc.collect()
+
     pubkey_x, pubkey_y = get_beam_pk(msg.kid_idx, msg.kid_sub_idx)
 
     if msg.show_display:

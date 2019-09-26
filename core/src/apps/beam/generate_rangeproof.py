@@ -1,3 +1,4 @@
+import gc
 from trezor.crypto import beam
 from trezor.messages.BeamRangeproofData import BeamRangeproofData
 
@@ -5,6 +6,8 @@ from apps.common import storage
 
 
 async def generate_rangeproof(ctx, msg):
+    gc.collect()
+
     asset_id = bytearray(0)
     rangeproof_data = bytearray(688)
 

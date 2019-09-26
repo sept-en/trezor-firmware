@@ -1,3 +1,4 @@
+import gc
 from trezor.crypto import beam
 from trezor.messages.BeamECCPoint import BeamECCPoint
 
@@ -5,6 +6,8 @@ from apps.common import storage
 
 
 async def generate_key(ctx, msg):
+    gc.collect()
+
     key_image_x = bytearray(32)
     key_image_y = bytearray(1)
 

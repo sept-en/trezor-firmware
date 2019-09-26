@@ -1,3 +1,4 @@
+import gc
 from trezor import wire
 from trezor.messages.Success import Success
 
@@ -7,6 +8,8 @@ from apps.beam.sign_message import message_digest
 
 
 async def verify_message(ctx, msg):
+    gc.collect()
+
     message = message_digest(msg.message)
     if len(msg.signature.nonce_pub.x) != 32 or len(msg.signature.sign_k) != 32:
         raise wire.DataError("Invalid size of signature params")

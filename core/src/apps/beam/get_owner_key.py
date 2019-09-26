@@ -1,3 +1,4 @@
+import gc
 import ubinascii
 
 from trezor.crypto import beam
@@ -8,6 +9,8 @@ from apps.beam.layout import beam_confirm_message
 
 
 async def get_owner_key(ctx, msg):
+    gc.collect()
+
     export_warning_msg = (
         "Exposing the key to a third party allows them to see your balance."
     )

@@ -1,3 +1,4 @@
+import gc
 from trezor.crypto import beam
 from trezor.messages.BeamSignedTransaction import BeamSignedTransaction
 
@@ -7,6 +8,7 @@ from apps.common import storage
 
 
 async def sign_transaction(ctx, msg):
+    gc.collect()
     tm = beam.TransactionMaker()
     mnemonic = storage.device.get_mnemonic_secret()
 

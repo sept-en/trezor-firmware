@@ -1,3 +1,5 @@
+import gc
+
 from trezor.crypto import beam
 from trezor.crypto.hashlib import sha256
 from trezor.messages.BeamECCPoint import BeamECCPoint
@@ -18,6 +20,8 @@ def message_digest(message):
 
 
 async def sign_message(ctx, msg):
+    gc.collect()
+
     await require_confirm_sign_message(ctx, msg.msg, False)
 
     sign_nonce_pub_x = bytearray(32)
