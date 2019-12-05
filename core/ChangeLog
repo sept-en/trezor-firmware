@@ -1,16 +1,25 @@
 Version 2.x.x [not yet released]
-* nothing yet
+* SD card protection
+* Remove unused ButtonRequest.data field
+* Rework Recovery persistence internally
+* Disallow changing of settings via dry-run recovery
 
-Version 2.1.6 [to be released Oct 2019]
+Version 2.1.8 [Nov 2019]
+* Support Tezos 005-BABYLON hardfork
+* Show XPUBs in GetAddress for multisig
+* Security improvements
+
+Version 2.1.7 [Oct 2019]
+* Fix low memory issue
+
+Version 2.1.6 [Oct 2019]
 * Refactor Shamir related codebase
 * Super Shamir
 * FIDO2
 * FIDO2 credential management via trezorctl
-* SD card protection
 * BackupType in Features
 
 Version 2.1.5 [Sep 2019]
-* Introduce Bitcoin-only firmware
 * Fix for sluggish U2F authentication when using Shamir
 * Fix UI for Shamir with 33 words
 * Fix Wanchain signing
