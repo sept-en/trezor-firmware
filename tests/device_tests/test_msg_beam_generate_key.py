@@ -19,12 +19,13 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
 
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGenerateKey(TrezorTest):
+class TestBeamGenerateKey:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "idx, type, sub_idx, value, expected_key_image_x, expected_key_image_y",
         [
@@ -113,7 +114,6 @@ class TestBeamGenerateKey(TrezorTest):
     def test_generate_key(
         self, idx, type, sub_idx, value, expected_key_image_x, expected_key_image_y
     ):
-        self.setup_mnemonic_allallall()
         is_coin_key = True
 
         expected_responses = [messages.BeamECCPoint()]

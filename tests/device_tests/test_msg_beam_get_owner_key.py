@@ -19,12 +19,10 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
-
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGetOwnerKeyMessage(TrezorTest):
+class TestBeamGetOwnerKeyMessage:
     def test_get_owner_key(self, client):
         self.setup_mnemonic_pin_nopassphrase()
 

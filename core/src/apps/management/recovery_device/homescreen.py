@@ -1,3 +1,6 @@
+import storage
+
+from trezor import workflow
 from trezor.crypto import random, slip39
 from trezor.crypto.hashlib import sha256
 from trezor.errors import MnemonicError
@@ -7,7 +10,7 @@ from trezor.messages.Success import Success
 from . import recover
 
 from apps.beam.nonce import create_master_nonce as create_beam_master_nonce
-from apps.common import mnemonic, storage
+from apps.common import mnemonic
 from apps.common.layout import show_success
 from apps.homescreen.homescreen import homescreen
 from apps.management import backup_types

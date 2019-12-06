@@ -103,7 +103,7 @@ class TestBeamSignTransaction(unittest.TestCase):
 
         config.init()
         config.wipe()
-        config.unlock(pin_to_int(''))
+        config.unlock(pin_to_int(''), None)
         create_master_nonce(self.seed)
 
         for test_params in test_datasets:

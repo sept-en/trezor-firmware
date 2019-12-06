@@ -18,18 +18,18 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
+
 
 SLOTS_TO_TEST = [(1), (2), (3), (4), (5), (6), (7), (8), (9), (10)]
 
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGenerateNonce(TrezorTest):
+class TestBeamGenerateNonce:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize("slot", SLOTS_TO_TEST)
     def test_generate_nonce(self, client, slot):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [messages.BeamECCPoint()]
 
         with client:
@@ -39,11 +39,10 @@ class TestBeamGenerateNonce(TrezorTest):
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGetNonceImage(TrezorTest):
+class TestBeamGetNonceImage:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize("slot", SLOTS_TO_TEST)
     def test_get_nonce_image(self, client, slot):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [
             messages.BeamECCPoint(),
             messages.BeamECCPoint(),

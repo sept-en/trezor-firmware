@@ -19,12 +19,13 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
 
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamSignVerifyMessage(TrezorTest):
+class TestBeamSignVerifyMessage:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "kid_idx, kid_sub_idx, message, nonce_pub_x, nonce_pub_y, sign_k, expected_is_valid",
         [
@@ -140,8 +141,6 @@ class TestBeamSignVerifyMessage(TrezorTest):
         sign_k,
         expected_is_valid,
     ):
-        self.setup_mnemonic_allallall()
-
         expected_responses_positive = [
             # Public Key
             messages.BeamECCPoint(),
@@ -186,6 +185,7 @@ class TestBeamSignVerifyMessage(TrezorTest):
             )
             assert is_verified == expected_is_valid
 
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "message, nonce_pub_x, nonce_pub_y, sign_k, pk_x, pk_y, expected_is_valid",
         [
@@ -274,8 +274,6 @@ class TestBeamSignVerifyMessage(TrezorTest):
         pk_y,
         expected_is_valid,
     ):
-        self.setup_mnemonic_allallall()
-
         expected_responses_positive = [
             # Verify process
             messages.ButtonRequest(),
@@ -315,6 +313,7 @@ class TestBeamSignVerifyMessage(TrezorTest):
             )
             assert is_verified == expected_is_valid
 
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "kid_idx, kid_sub_idx, message",
         [
@@ -327,8 +326,6 @@ class TestBeamSignVerifyMessage(TrezorTest):
         ],
     )
     def test_beam_sign_message(self, client, kid_idx, kid_sub_idx, message):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [
             # Sign message
             messages.ButtonRequest(),

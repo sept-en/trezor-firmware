@@ -18,6 +18,7 @@ from trezorlib.messages import ButtonRequestType as B
 
 # fmt: off
 #                1      2     3    4      5      6      7     8      9    10    11    12
+MNEMONIC_ALLALLALL = "all all all all all all all all all all all all"
 MNEMONIC12 = "alcohol woman abuse must during monitor noble actual mixed trade anger aisle"
 MNEMONIC_SLIP39_BASIC_20_3of6 = [
     "extra extend academic bishop cricket bundle tofu goat apart victim enlarge program behavior permit course armed jerky faint language modern",

@@ -1,10 +1,10 @@
 import gc
+import storage
 from trezor.crypto import beam
 from trezor.messages.BeamSignedTransaction import BeamSignedTransaction
 
 from apps.beam.layout import beam_confirm_message
 from apps.beam.nonce import consume_nonce
-from apps.common import storage
 
 
 async def sign_transaction(ctx, msg):

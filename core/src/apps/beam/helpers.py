@@ -1,6 +1,6 @@
 from trezor.crypto import beam, random
 
-from apps.common import storage
+import storage
 
 
 def BBS_KEY():

@@ -12,7 +12,7 @@ from trezor.pin import pin_to_int
 def __init_and_unlock_config():
     config.init()
     config.wipe()
-    config.unlock(pin_to_int(''))
+    config.unlock(pin_to_int(''), None)
 
 
 class TestBeamGenerateNonce(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestBeamGenerateNonce(unittest.TestCase):
 
         config.init()
         config.wipe()
-        config.unlock(pin_to_int(''))
+        config.unlock(pin_to_int(''), None)
         self.assertEqual(is_master_nonce_created(), False)
 
         create_master_nonce(self.seed)

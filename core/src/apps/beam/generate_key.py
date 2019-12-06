@@ -1,8 +1,8 @@
 import gc
 from trezor.crypto import beam
 from trezor.messages.BeamECCPoint import BeamECCPoint
-
-from apps.common import storage
+from apps.common import mnemonic
+import storage
 
 
 async def generate_key(ctx, msg):
@@ -11,8 +11,9 @@ async def generate_key(ctx, msg):
     key_image_x = bytearray(32)
     key_image_y = bytearray(1)
 
-    mnemonic = storage.device.get_mnemonic_secret()
-    seed = beam.from_mnemonic_beam(mnemonic)
+    mnemonic_secret = bytearray(32)
+    mnemonic_secret = mnemonic.get_secret()
+    seed = beam.from_mnemonic_beam(mnemonic_secret)
 
     beam.generate_key(
         msg.kidv.idx,

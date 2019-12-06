@@ -19,7 +19,8 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
+
 
 KERNEL_PARAMS = {
     "fee": 1,
@@ -46,7 +47,8 @@ KERNEL_PARAMS = {
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamSignTxMessage(TrezorTest):
+class TestBeamSignTxMessage:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "inputs, outputs, offset_sk, nonce_slot",
         [
@@ -79,8 +81,6 @@ class TestBeamSignTxMessage(TrezorTest):
         ],
     )
     def test_sign_tx(self, client, inputs, outputs, offset_sk, nonce_slot):
-        self.setup_mnemonic_allallall()
-
         inputs = [beam.create_kidv(input) for input in inputs]
         outputs = [beam.create_kidv(output) for output in outputs]
 

@@ -19,12 +19,13 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
 
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGenerateRangeproof(TrezorTest):
+class TestBeamGenerateRangeproof:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "idx, type, sub_idx, value, is_public",
         [
@@ -35,8 +36,6 @@ class TestBeamGenerateRangeproof(TrezorTest):
         ],
     )
     def test_generate_rangeproof(self, client, idx, type, sub_idx, value, is_public):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [messages.BeamRangeproofData()]
 
         with self.client:

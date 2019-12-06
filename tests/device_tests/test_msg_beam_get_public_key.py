@@ -19,7 +19,8 @@ import pytest
 
 from trezorlib import beam, messages
 
-from .common import TrezorTest
+from ..common import MNEMONIC_ALLALLALL
+
 
 VALID_VECTORS = [
     (0, 0, "88b528eecb5ee5ae81e56e2105aca06997761c9cd2e566b25eaee1951be26688", 1),
@@ -38,13 +39,12 @@ VALID_VECTORS = [
 
 @pytest.mark.skip_t1  # T1 support is not planned
 @pytest.mark.beam
-class TestBeamGetPublicKey(TrezorTest):
+class TestBeamGetPublicKey:
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS
     )
     def test_generate_pk(self, client, idx, sub_idx, expected_pk_x, expected_pk_y):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [messages.BeamECCPoint()]
 
         with self.client:
@@ -53,14 +53,13 @@ class TestBeamGetPublicKey(TrezorTest):
             assert pk.x.hex() == expected_pk_x
             assert int(pk.y) == expected_pk_y
 
+    @pytest.mark.setup_client(mnemonic=MNEMONIC_ALLALLALL)
     @pytest.mark.parametrize(
         "idx, sub_idx, expected_pk_x, expected_pk_y", VALID_VECTORS
     )
     def test_generate_pk_with_display(
         self, client, idx, sub_idx, expected_pk_x, expected_pk_y
     ):
-        self.setup_mnemonic_allallall()
-
         expected_responses = [
             messages.ButtonRequest(code=messages.ButtonRequestType.PublicKey),
             messages.ButtonRequest(code=messages.ButtonRequestType.PublicKey),
