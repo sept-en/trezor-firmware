@@ -9,9 +9,9 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
-#include "field_impl.h"
-#include "group_impl.h"
-#include "scalar_impl.h"
+#include "beam/lib/secp256k1-zkp/src/field_impl.h"
+#include "beam/lib/secp256k1-zkp/src/group_impl.h"
+#include "beam/lib/secp256k1-zkp/src/scalar_impl.h"
 #pragma GCC diagnostic pop
 
 /// package: trezorcrypto.beam
