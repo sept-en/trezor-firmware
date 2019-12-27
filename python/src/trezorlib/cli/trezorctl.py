@@ -26,7 +26,7 @@ from .. import coins, log, messages, protobuf, ui
 from ..client import TrezorClient
 from ..transport import enumerate_devices, get_transport
 from . import (
-    beam,
+    #beam,
     binance,
     btc,
     cardano,
